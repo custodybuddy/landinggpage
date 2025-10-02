@@ -113,3 +113,19 @@ export const books = [
       ariaLabel: "View Dark Psychology and Manipulation on Amazon (paid link)"
     }
 ];
+
+export const legalAidServices = [
+    { province: 'Ontario', url: 'https://www.legalaid.on.ca/' },
+    { province: 'British Columbia', url: 'https://legalaid.bc.ca/' },
+    { province: 'Alberta', url: 'https://www.legalaid.ab.ca/' },
+    { province: 'Quebec', url: 'https://www.csj.qc.ca/' },
+    { province: 'Manitoba', url: 'https://www.legalaid.mb.ca/' },
+    { province: 'Saskatchewan', url: 'https://www.legalaid.sk.ca/' },
+    { province: 'Nova Scotia', url: 'https://www.nslegalaid.ca/' },
+    { province: 'New Brunswick', url: 'https://www.legalaid.nb.ca/' },
+    { province: 'Newfoundland & Labrador', url: 'https://www.legalaid.nl.ca/' },
+    { province: 'Prince Edward Island', url: 'https://www.legalinfopei.ca/legal-aid/' },
+    { province: 'Yukon', url: 'https://www.legalaid.yk.ca/' },
+    { province: 'Northwest Territories', url: 'https://www.justice.gov.nt.ca/en/boards-agencies/legal-aid-commission/' },
+    { province: 'Nunavut', url: 'https://www.nulas.ca/' },
+];

@@ -1,5 +1,5 @@
 import React from 'react';
-import { books } from '../constants';
+import { books, legalAidServices } from '../constants';
 import ExternalLinkIcon from './icons/ExternalLinkIcon';
 
 const Resources: React.FC = () => {
@@ -36,6 +36,35 @@ const Resources: React.FC = () => {
                             </div>
                         </div>
                     ))}
+                </div>
+
+                <div className="mt-24 pt-16 border-t border-slate-800">
+                    <h3 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6">
+                        <span className="text-white/90">Find Legal Aid in </span>
+                        <span className="text-amber-400">Your Province</span>
+                    </h3>
+                    <p className="text-lg md:text-xl bg-gradient-to-r from-gray-300 to-gray-400 text-transparent bg-clip-text max-w-4xl mx-auto mb-16 leading-relaxed">
+                        Legal aid services provide crucial assistance to low-income individuals. Explore the resources in your province to see if you qualify for support.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+                        {legalAidServices.map((service, index) => (
+                            <a 
+                                key={index} 
+                                href={service.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-2xl flex items-center justify-between h-full border border-amber-400/50 transition-all duration-300 ease-out hover:bg-slate-700/80 motion-safe:hover:-translate-y-1 hover:border-amber-400 group"
+                                aria-label={`Visit legal aid services for ${service.province}`}
+                            >
+                                <span className="text-xl font-semibold text-white group-hover:text-amber-300 transition-colors">
+                                    {service.province}
+                                </span>
+                                <div className="text-amber-400 group-hover:text-white transition-colors">
+                                    <ExternalLinkIcon />
+                                </div>
+                            </a>
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
