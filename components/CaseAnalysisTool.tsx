@@ -2,50 +2,86 @@
 import React, { useState } from 'react';
 import { GoogleGenAI } from "@google/genai";
 
-// A more robust markdown to HTML converter for the expected AI response format.
+// A robust markdown-to-HTML converter for the expected AI response format.
 const formatMarkdown = (text: string): string => {
-    // Split the text into lines
+    // This helper for inline formatting handles bold, italic, and code.
+    const processInlineFormatting = (str: string): string => {
+        // Process in order of complexity to avoid conflicts (e.g., ** before *)
+        return str
+            .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>') // Bold + Italic
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')       // Bold
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')         // Italic
+            .replace(/_([^_]+)_/g, '<em>$1</em>')       // Italic (underscore)
+            .replace(/`([^`]+)`/g, '<code class="bg-slate-700 text-amber-300 px-1 py-0.5 rounded text-sm font-mono">$1</code>'); // Inline code
+    };
+
     const lines = text.split('\n');
     let html = '';
     let inList = false;
+    let inCodeBlock = false;
+    let codeBlockContent = '';
 
     for (const line of lines) {
-        // Trim the line to handle whitespace
-        const trimmedLine = line.trim();
-
-        // Check for bullet points (lines starting with *)
-        if (trimmedLine.startsWith('* ')) {
-            const listItemText = trimmedLine.substring(2);
-            if (!inList) {
-                // Start a new list
-                html += '<ul class="list-disc pl-6 space-y-1">';
-                inList = true;
-            }
-            // Add the list item, formatting for bold text inside
-            html += `<li>${listItemText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`;
-        } else {
-            // This line is not a list item. It could be a paragraph or a blank line.
-            if (trimmedLine) {
-                // It's a paragraph. If we were in a list, close it first.
-                if (inList) {
+        // --- 1. Handle Code Blocks ---
+        // They are self-contained and override other formatting.
+        if (line.trim().startsWith('```')) {
+            if (inCodeBlock) { // Closing fence
+                const escapedCode = codeBlockContent.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                html += `<pre class="bg-slate-950 p-4 rounded-md overflow-x-auto"><code class="text-white text-sm font-mono">${escapedCode.trim()}</code></pre>`;
+                inCodeBlock = false;
+                codeBlockContent = '';
+            } else { // Opening fence
+                if (inList) { // If a list was open, close it first.
                     html += '</ul>';
                     inList = false;
                 }
-                // Now, add the paragraph.
-                html += `<p>${trimmedLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</p>`;
+                inCodeBlock = true;
             }
-            // If trimmedLine is empty, we do nothing. This preserves `inList` state
-            // across blank lines, allowing a single list to have empty lines between items.
+            continue; // Move to next line
+        }
+
+        if (inCodeBlock) {
+            codeBlockContent += line + '\n';
+            continue;
+        }
+
+        // --- 2. Handle List Items ---
+        if (line.trim().startsWith('* ')) {
+            if (!inList) {
+                html += '<ul class="list-disc pl-6 space-y-2">';
+                inList = true;
+            }
+            // Add the list item, processing inline formats on its content
+            html += `<li>${processInlineFormatting(line.trim().substring(2))}</li>`;
+        } 
+        // --- 3. Handle Paragraphs and Other Lines ---
+        else {
+            if (inList) {
+                // Any non-list-item line will terminate the current list.
+                html += '</ul>';
+                inList = false;
+            }
+            if (line.trim()) {
+                // If the line has content, wrap it in a paragraph tag.
+                html += `<p>${processInlineFormatting(line)}</p>`;
+            }
+            // Blank lines effectively just add a separation by closing the list.
         }
     }
 
-    // If the text ends while inside a list, close the list tag
+    // --- 4. Cleanup ---
+    // Ensure any open tags are closed at the end of the text.
     if (inList) {
         html += '</ul>';
+    }
+    if (inCodeBlock) { // Failsafe for unclosed code block
+        const escapedCode = codeBlockContent.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        html += `<pre class="bg-slate-950 p-4 rounded-md overflow-x-auto"><code class="text-white text-sm font-mono">${escapedCode.trim()}</code></pre>`;
     }
 
     return html;
 };
+
 
 const EXAMPLE_INPUT = `Clause 7.2 from Separation Agreement:
 
@@ -128,8 +164,28 @@ ${query}
             setResponse(result.text);
 
         } catch (err) {
-            console.error(err);
-            setError('An error occurred while analyzing your document. Please check the text and try again.');
+            console.error("Analysis Error:", err);
+            
+            // Default error message
+            let friendlyErrorMessage = 'An error occurred while analyzing your document. Please try again later.';
+
+            if (err instanceof Error) {
+                const message = err.message.toLowerCase();
+                
+                if (message.includes('api key')) {
+                    // This is a developer/configuration error, not a user error.
+                    // Don't expose "API key" to the user.
+                    friendlyErrorMessage = 'The analysis service is currently unavailable due to a configuration issue. Please contact support.';
+                } else if (message.includes('fetch') || err.name === 'TypeError') {
+                    // Network-related error
+                    friendlyErrorMessage = 'A network error occurred. Please check your internet connection and try again.';
+                } else if (message.includes('safety') || message.includes('blocked')) {
+                    // Content moderation-related error from the API
+                    friendlyErrorMessage = 'The document could not be analyzed due to content restrictions. Please ensure the text does not contain sensitive personal information or inappropriate material.';
+                }
+            }
+            
+            setError(friendlyErrorMessage);
         } finally {
             setIsLoading(false);
         }
