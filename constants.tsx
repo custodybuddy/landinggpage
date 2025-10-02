@@ -1,4 +1,3 @@
-
 import React from 'react';
 import CalendarCheckIcon from './components/icons/CalendarCheckIcon';
 import SwordsIcon from './components/icons/SwordsIcon';
@@ -45,7 +44,7 @@ export const features = [
         title: <>Email Law Buddy: <span className="text-amber-400">Shut Down</span> the Games.</>,
         description: 'Stop emotional manipulation with professional, AI-drafted responses that maintain composure and build your legal case.',
         buttonText: 'STOP THE GAMES',
-        link: 'https://chatgpt.com/g/g-681d37904f8481919508226a5b2f4bb8-email-law-buddy-custodybuddy-com',
+        link: '#',
     },
 ];
 

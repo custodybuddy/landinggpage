@@ -2,13 +2,18 @@ import React, { useState } from 'react';
 import { features } from '../constants';
 import Modal from './Modal';
 import CaseAnalysisTool from './CaseAnalysisTool';
+import EmailLawBuddy from './EmailLawBuddy';
 
 const Features: React.FC = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCaseAnalysisModalOpen, setIsCaseAnalysisModalOpen] = useState(false);
+    const [isEmailBuddyModalOpen, setIsEmailBuddyModalOpen] = useState(false);
 
     const handleButtonClick = (featureId: string) => {
         if (featureId === 'case-analysis') {
-            setIsModalOpen(true);
+            setIsCaseAnalysisModalOpen(true);
+        }
+        if (featureId === 'email-buddy') {
+            setIsEmailBuddyModalOpen(true);
         }
     };
     
@@ -29,7 +34,7 @@ const Features: React.FC = () => {
                                     {feature.title}
                                 </h3>
                                 <p className="text-gray-400 mb-4 flex-grow text-balance">{feature.description}</p>
-                                {feature.id === 'case-analysis' ? (
+                                {feature.id === 'case-analysis' || feature.id === 'email-buddy' ? (
                                     <button
                                         onClick={() => handleButtonClick(feature.id)}
                                         className="inline-block bg-amber-400 text-black font-semibold py-2 px-6 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 mt-auto focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-800"
@@ -52,11 +57,18 @@ const Features: React.FC = () => {
                 </div>
             </section>
             <Modal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                isOpen={isCaseAnalysisModalOpen}
+                onClose={() => setIsCaseAnalysisModalOpen(false)}
                 title="Family Law Case Analysis Tool"
             >
                 <CaseAnalysisTool />
+            </Modal>
+            <Modal
+                isOpen={isEmailBuddyModalOpen}
+                onClose={() => setIsEmailBuddyModalOpen(false)}
+                title="Email Law Buddy"
+            >
+                <EmailLawBuddy />
             </Modal>
         </>
     );
