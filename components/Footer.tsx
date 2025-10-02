@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const Footer: React.FC = () => {
@@ -6,13 +5,13 @@ const Footer: React.FC = () => {
         <footer id="contact" className="bg-slate-900 py-8 text-center text-gray-400 border-t border-slate-800">
             <div className="container mx-auto px-4">
                 <nav className="space-x-4 mb-4">
-                    <a href="#features" className="hover:text-amber-400 transition">Features</a>
-                    <a href="#social-proof" className="hover:text-amber-400 transition">Testimonials</a>
-                    <a href="#donation" className="hover:text-amber-400 transition">Donate</a>
-                    <a href="https://blog.custodybuddy.com" className="hover:text-amber-400 transition" target="_blank" rel="noopener noreferrer">Blog</a>
-                    <a href="#" className="hover:text-amber-400 transition">Privacy Policy</a>
-                    <a href="#" className="hover:text-amber-400 transition">Terms of Use</a>
-                    <a href="#contact" className="hover:text-amber-400 transition">Contact</a>
+                    <a href="#features" className="hover:text-amber-400 transition-colors duration-200 ease-out">Features</a>
+                    <a href="#social-proof" className="hover:text-amber-400 transition-colors duration-200 ease-out">Testimonials</a>
+                    <a href="#donation" className="hover:text-amber-400 transition-colors duration-200 ease-out">Donate</a>
+                    <a href="https://blog.custodybuddy.com" className="hover:text-amber-400 transition-colors duration-200 ease-out" target="_blank" rel="noopener noreferrer">Blog</a>
+                    <a href="#" className="hover:text-amber-400 transition-colors duration-200 ease-out">Privacy Policy</a>
+                    <a href="#" className="hover:text-amber-400 transition-colors duration-200 ease-out">Terms of Use</a>
+                    <a href="#contact" className="hover:text-amber-400 transition-colors duration-200 ease-out">Contact</a>
                 </nav>
 
                 <p className="text-sm">&copy; {new Date().getFullYear()} CustodyBuddy.com. All Rights Reserved.</p>

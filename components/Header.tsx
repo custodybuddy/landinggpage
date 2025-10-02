@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import MenuIcon from './icons/MenuIcon';
 
@@ -42,18 +41,18 @@ const Header: React.FC = () => {
                              <a 
                                 key={link.text} 
                                 href={link.href} 
-                                className="hover:text-amber-400 transition" 
+                                className="hover:text-amber-400 transition-colors duration-200 ease-out" 
                                 target={link.external ? '_blank' : '_self'} 
                                 rel={link.external ? 'noopener noreferrer' : ''}
                             >
                                 {link.text}
                             </a>
                         ))}
-                        <a href="#features" className="inline-block bg-amber-400 text-black font-semibold py-2 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                        <a href="#features" className="inline-block bg-amber-400 text-black font-semibold py-2 px-6 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-900">
                             Start Now
                         </a>
                     </div>
-                    <button id="mobile-menu-toggle" aria-label="Toggle mobile menu" className="md:hidden text-white hover:text-amber-400 transition" onClick={toggleMenu}>
+                    <button id="mobile-menu-toggle" aria-label="Toggle mobile menu" className="md:hidden text-white hover:text-amber-400 transition-colors duration-200 ease-out" onClick={toggleMenu}>
                         <MenuIcon />
                     </button>
                 </div>
@@ -67,7 +66,7 @@ const Header: React.FC = () => {
                          <a 
                             key={link.text} 
                             href={link.href} 
-                            className="hover:text-amber-400 transition" 
+                            className="hover:text-amber-400 transition-colors duration-200 ease-out" 
                             target={link.external ? '_blank' : '_self'} 
                             rel={link.external ? 'noopener noreferrer' : ''}
                             onClick={toggleMenu}

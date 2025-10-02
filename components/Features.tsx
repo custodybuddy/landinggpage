@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { features } from '../constants';
 import Modal from './Modal';
@@ -33,14 +32,14 @@ const Features: React.FC = () => {
                                 {feature.id === 'case-analysis' ? (
                                     <button
                                         onClick={() => handleButtonClick(feature.id)}
-                                        className="inline-block bg-amber-400 text-black font-semibold py-2 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 mt-auto"
+                                        className="inline-block bg-amber-400 text-black font-semibold py-2 px-6 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 mt-auto focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-800"
                                     >
                                         {feature.buttonText}
                                     </button>
                                 ) : (
                                     <a 
                                         href={feature.link} 
-                                        className="inline-block bg-amber-400 text-black font-semibold py-2 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 mt-auto"
+                                        className="inline-block bg-amber-400 text-black font-semibold py-2 px-6 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 mt-auto focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-800"
                                         target={feature.link && feature.link.startsWith('http') ? '_blank' : '_self'}
                                         rel={feature.link && feature.link.startsWith('http') ? 'noopener noreferrer' : ''}
                                     >

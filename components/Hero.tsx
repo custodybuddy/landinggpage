@@ -1,4 +1,3 @@
-
 import React from 'react';
 import CheckCheckIcon from './icons/CheckCheckIcon';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
@@ -15,10 +14,10 @@ const Hero: React.FC = () => {
                     Transform stress into strategy, turn manipulation into court evidence.
                 </p>
                 <div className="space-y-4 sm:space-y-0 sm:space-x-4 animate-fade-in-up delay-400">
-                    <a href="#features" className="inline-block bg-amber-400 text-black font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                    <a href="#features" className="inline-block bg-amber-400 text-black font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-900">
                         Document Their Lies
                     </a>
-                    <a href="#social-proof" className="inline-block bg-transparent text-amber-400 border-2 border-amber-400 font-bold py-3 px-8 rounded-full shadow-lg transition-colors hover:bg-amber-400 hover:text-black">
+                    <a href="#social-proof" className="inline-block bg-transparent text-amber-400 border-2 border-amber-400 font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-200 ease-out hover:bg-amber-400 hover:text-black focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-900">
                         See Success Stories
                     </a>
                 </div>
