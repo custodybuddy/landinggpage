@@ -10,11 +10,11 @@ const Testimonials: React.FC = () => {
                     Don't just take our word for it. See how CustodyBuddy has helped parents like you.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="bg-slate-800 p-8 rounded-2xl shadow-xl text-left animate-fade-in-up delay-200">
+                    <div className="bg-slate-800 p-8 rounded-2xl shadow-xl text-left animate-fade-in-up delay-200 border border-amber-400/50">
                         <p className="text-xl italic mb-4">"CustodyBuddy gave me the confidence to stand my ground. I finally have court-ready evidence to expose the lies my ex has been telling."</p>
                         <p className="font-bold text-amber-400">Sarah M., Toronto</p>
                     </div>
-                    <div className="bg-slate-800 p-8 rounded-2xl shadow-xl text-left animate-fade-in-up delay-300">
+                    <div className="bg-slate-800 p-8 rounded-2xl shadow-xl text-left animate-fade-in-up delay-300 border border-amber-400/50">
                         <p className="text-xl italic mb-4">"As a self-represented father, I felt completely outmatched. The 'Fathers' Rights Ontario' tool was a game-changer. I'm no longer fighting blind."</p>
                         <p className="font-bold text-amber-400">David P., Ottawa</p>
                     </div>

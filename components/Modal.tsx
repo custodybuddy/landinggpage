@@ -30,14 +30,14 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
 
     return (
         <div 
-            className={`fixed inset-0 bg-black z-50 flex justify-center items-center p-4 transition-opacity duration-300 ease-in-out ${isOpen ? 'bg-opacity-70' : 'bg-opacity-0'}`}
+            className={`fixed inset-0 bg-black z-50 flex justify-center items-center p-4 transition-opacity duration-400 ease-out ${isOpen ? 'bg-opacity-70' : 'bg-opacity-0'}`}
             onClick={onClose}
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
         >
             <div 
-                className={`bg-slate-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col relative transition-all duration-300 ease-in-out ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 motion-safe:scale-95 motion-safe:translate-y-4'}`}
+                className={`bg-slate-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col relative transition-all duration-400 ease-out ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 motion-safe:scale-95 motion-safe:translate-y-4'}`}
                 onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
                 onTransitionEnd={handleAnimationEnd}
             >

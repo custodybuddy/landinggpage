@@ -26,7 +26,7 @@ const Features: React.FC = () => {
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {features.map((feature, index) => (
-                            <div key={index} className={`bg-slate-800 p-8 rounded-2xl shadow-xl flex flex-col items-center animate-fade-in-up delay-${index * 100}`}>
+                            <div key={index} className={`bg-slate-800 p-8 rounded-2xl shadow-xl flex flex-col items-center animate-fade-in-up delay-${index * 100} transition-all duration-300 ease-out hover:bg-slate-700/80 motion-safe:hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-400/10 border border-amber-400/50 hover:border-amber-400`}>
                                 <div className="p-4 rounded-full bg-amber-400 text-slate-900 mb-4">
                                     {feature.icon}
                                 </div>

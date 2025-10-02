@@ -17,7 +17,7 @@ const Resources: React.FC = () => {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
                     {books.map((book, index) => (
-                        <div key={index} className="bg-slate-800/50 backdrop-blur-sm p-8 rounded-2xl flex flex-col items-center h-full border border-slate-700">
+                        <div key={index} className="bg-slate-800/50 backdrop-blur-sm p-8 rounded-2xl flex flex-col items-center h-full border border-amber-400/50">
                             <div className="overflow-hidden rounded-xl mb-6 shadow-lg">
                                 <img src={book.imageUrl} alt={book.alt} className="w-full h-auto aspect-[2/3] object-cover"/>
                             </div>

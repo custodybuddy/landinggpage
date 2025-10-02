@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import ClipboardIcon from './icons/ClipboardIcon';
 import ClipboardCheckIcon from './icons/ClipboardCheckIcon';
+import AlertTriangleIcon from './icons/AlertTriangleIcon';
+import XIcon from './icons/XIcon';
 
 const EXAMPLE_RECEIVED_EMAIL = `Subject: Lily's weekend
 
@@ -170,8 +172,16 @@ ${keyPoints}
             </div>
 
             {error && (
-                <div className="bg-red-900/20 border border-red-500/50 text-red-400 text-sm rounded-lg p-3 animate-fade-in-up-fast">
-                    {error}
+                <div className="bg-red-900/20 border border-red-500/50 text-red-400 text-sm rounded-lg p-4 flex items-center gap-3 animate-fade-in-up-fast" role="alert">
+                    <AlertTriangleIcon className="w-5 h-5 flex-shrink-0" />
+                    <p className="flex-grow">{error}</p>
+                    <button 
+                        onClick={() => setError(null)}
+                        className="text-red-400 hover:text-white transition-colors duration-200"
+                        aria-label="Dismiss error message"
+                    >
+                        <XIcon className="w-5 h-5" />
+                    </button>
                 </div>
             )}
 

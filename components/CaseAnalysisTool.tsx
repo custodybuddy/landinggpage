@@ -5,6 +5,7 @@ import FileTextIcon from './icons/FileTextIcon';
 import RotateCwIcon from './icons/RotateCwIcon';
 import DownloadIcon from './icons/DownloadIcon';
 import CheckCircleIcon from './icons/CheckCircleIcon';
+import AlertTriangleIcon from './icons/AlertTriangleIcon';
 
 // A robust markdown-to-HTML converter for the expected AI response format.
 const formatMarkdown = (text: string): string => {
@@ -424,17 +425,27 @@ Analyze the document content provided by the user. Structure your response using
             />
             
             {error && (
-                <div className="bg-red-900/20 border border-red-500/50 text-red-400 text-sm rounded-lg p-3 flex items-center justify-between gap-4 animate-fade-in-up-fast">
-                    <p>{error}</p>
-                    <button
-                        onClick={handleAnalyze}
-                        disabled={isLoading}
-                        className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 ease-out disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-800 transform motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0"
-                        aria-label="Retry Analysis"
-                    >
-                        <RotateCwIcon className="w-4 h-4" />
-                        <span>Retry</span>
-                    </button>
+                <div className="bg-red-900/20 border border-red-500/50 text-red-400 text-sm rounded-lg p-3 flex items-center gap-3 animate-fade-in-up-fast" role="alert">
+                    <AlertTriangleIcon className="w-5 h-5 flex-shrink-0" />
+                    <p className="flex-grow">{error}</p>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                        <button
+                            onClick={handleAnalyze}
+                            disabled={isLoading}
+                            className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white font-semibold py-1 px-3 rounded-md transition-all duration-200 ease-out disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                            aria-label="Retry Analysis"
+                        >
+                            <RotateCwIcon className="w-4 h-4" />
+                            <span>Retry</span>
+                        </button>
+                        <button 
+                            onClick={() => setError(null)}
+                            className="text-red-400 hover:text-white transition-colors duration-200"
+                            aria-label="Dismiss error message"
+                        >
+                            <XIcon className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
             )}
             
