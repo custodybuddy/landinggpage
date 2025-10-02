@@ -4,6 +4,7 @@ import XIcon from './icons/XIcon';
 import FileTextIcon from './icons/FileTextIcon';
 import RotateCwIcon from './icons/RotateCwIcon';
 import DownloadIcon from './icons/DownloadIcon';
+import CheckCircleIcon from './icons/CheckCircleIcon';
 
 // A robust markdown-to-HTML converter for the expected AI response format.
 const formatMarkdown = (text: string): string => {
@@ -381,9 +382,9 @@ Analyze the document content provided by the user. Structure your response using
                     aria-label="Upload a document for analysis"
                 />
                 <div className="flex flex-col items-center justify-center pointer-events-none">
-                    <UploadCloudIcon />
-                    <p className="mt-2 font-semibold text-white">
-                        {isDragging ? "Drop your file here" : "Click or drag & drop a document"}
+                    {justDropped ? <CheckCircleIcon /> : <UploadCloudIcon />}
+                    <p className={`mt-2 font-semibold transition-colors duration-200 ${justDropped ? 'text-green-400' : 'text-white'}`}>
+                        {justDropped ? 'File Accepted!' : isDragging ? 'Drop your file here' : 'Click or drag & drop a document'}
                     </p>
                     <p className="text-xs text-gray-400">PDF, DOCX, JPG, PNG (Max 10MB)</p>
                 </div>
