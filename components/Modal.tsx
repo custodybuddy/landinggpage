@@ -45,7 +45,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
                     <h2 id="modal-title" className="text-2xl font-bold text-amber-400">{title}</h2>
                     <button 
                         onClick={onClose} 
-                        className="text-gray-400 hover:text-white transition-colors duration-200 ease-out"
+                        className="text-gray-400 hover:text-white transition-all duration-200 ease-out transform motion-safe:hover:scale-110 motion-safe:active:scale-95"
                         aria-label="Close modal"
                     >
                         <XIcon />

@@ -178,7 +178,7 @@ ${keyPoints}
             <button
                 onClick={handleGenerate}
                 disabled={isLoading || !receivedEmail.trim() || !keyPoints.trim()}
-                className="bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-black font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 motion-safe:active:scale-100 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-800"
+                className="bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-black font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 motion-safe:active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-800"
             >
                 {isLoading ? (
                     <>
@@ -199,7 +199,7 @@ ${keyPoints}
                         <h3 className="text-xl font-bold text-amber-400">Generated Draft</h3>
                         <button
                             onClick={handleCopy}
-                            className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                            className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-900 transform motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0"
                             aria-label="Copy draft to clipboard"
                         >
                             {isCopied ? <ClipboardCheckIcon /> : <ClipboardIcon />}

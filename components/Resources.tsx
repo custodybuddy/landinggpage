@@ -25,7 +25,7 @@ const Resources: React.FC = () => {
                                 {book.title}
                             </span>
                             <div className="mt-5 flex items-center justify-center gap-2 flex-wrap">
-                                <a className="inline-flex items-center gap-2 bg-amber-400 text-black font-bold py-2.5 px-6 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-800"
+                                <a className="inline-flex items-center gap-2 bg-amber-400 text-black font-bold py-2.5 px-6 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 motion-safe:active:scale-95 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-800"
                                    href={book.amazonLink}
                                    target="_blank" rel="sponsored noopener noreferrer"
                                    aria-label={book.ariaLabel}>
