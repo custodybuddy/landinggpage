@@ -14,6 +14,7 @@ import { generateDraftEmail } from '../../services/aiService';
 import { useTextToSpeech } from '../../hooks/useTextToSpeech';
 import { ToneOption } from '../EmailLawBuddy';
 import Feedback from '../Feedback';
+import { cleanEmailForSpeech } from '../../utils/stringUtils';
 
 interface DraftingStationProps {
     receivedEmail: string;
@@ -108,19 +109,12 @@ ${keyPoints}
         }
     };
 
-    const cleanTextForSpeech = (text: string) => {
-        return text
-            .replace(/Subject: Re: .*\n\n/i, '')
-            .replace(/\[(.*?)\]/g, '$1')
-            .trim();
-    }
-
     const handleReadAloud = (tone: ToneOption, text: string) => {
         if (isSpeaking && speakingDraft === tone) {
             cancel();
             setSpeakingDraft(null);
         } else {
-            const cleanText = cleanTextForSpeech(text);
+            const cleanText = cleanEmailForSpeech(text);
             speak(cleanText);
             setSpeakingDraft(tone);
         }

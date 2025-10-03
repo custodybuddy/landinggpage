@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DownloadIcon from '../icons/DownloadIcon';
 import SpeakerIcon from '../icons/SpeakerIcon';
@@ -5,6 +6,9 @@ import StopCircleIcon from '../icons/StopCircleIcon';
 import { formatMarkdown } from '../../utils/markdownParser';
 import { useTextToSpeech } from '../../hooks/useTextToSpeech';
 import Feedback from '../Feedback';
+import { exportTextFile } from '../../utils/exportUtils';
+import { getISODate } from '../../utils/dateUtils';
+import { cleanMarkdownForSpeech } from '../../utils/stringUtils';
 
 interface AnalysisResultProps {
     response: string;
@@ -16,38 +20,16 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ response }) => {
     const handleExportAnalysis = () => {
         if (!response) return;
 
-        const blob = new Blob([response], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        const date = new Date().toISOString().split('T')[0];
-        link.download = `CustodyBuddy-Analysis-${date}.txt`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    };
-
-    const cleanTextForSpeech = (markdownText: string) => {
-        // Basic markdown removal for better speech flow
-        return markdownText
-            .replace(/\*\*(.*?)\*\*/g, '$1')
-            .replace(/\*(.*?)\*/g, '$1')
-            .replace(/_([^_]+)_/g, '$1')
-            .replace(/`([^`]+)`/g, '$1')
-            .replace(/#{1,6}\s/g, '')
-            .replace(/\[(.*?)\]\(.*?\)/g, '$1')
-            .replace(/(\*|\+|-)\s/g, '')
-            .replace(/---|===/g, '')
-            .replace(/\|/g, ', ')
-            .trim();
+        const date = getISODate();
+        const filename = `CustodyBuddy-Analysis-${date}.txt`;
+        exportTextFile(response, filename);
     };
 
     const handleReadAloud = () => {
         if (isSpeaking) {
             cancel();
         } else {
-            const plainText = cleanTextForSpeech(response);
+            const plainText = cleanMarkdownForSpeech(response);
             speak(plainText);
         }
     };

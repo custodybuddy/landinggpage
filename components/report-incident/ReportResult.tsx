@@ -1,10 +1,13 @@
 
+
 import React from 'react';
 import { IncidentReport, IncidentData } from '../../hooks/useIncidentReporter';
 import DownloadIcon from '../icons/DownloadIcon';
 import RotateCwIcon from '../icons/RotateCwIcon';
 import Feedback from '../Feedback';
 import ExternalLinkIcon from '../icons/ExternalLinkIcon';
+import { getISODate } from '../../utils/dateUtils';
+import { exportTextFile } from '../../utils/exportUtils';
 
 interface ReportResultProps {
     response: IncidentReport;
@@ -48,16 +51,9 @@ const ReportResult: React.FC<ReportResultProps> = ({ response, originalData, onS
 
     const handleExport = () => {
         const reportText = generateReportText();
-        const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        const date = new Date().toISOString().split('T')[0];
-        link.download = `CustodyBuddy-Incident-Report-${date}.txt`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        const date = getISODate();
+        const filename = `CustodyBuddy-Incident-Report-${date}.txt`;
+        exportTextFile(reportText, filename);
     };
 
     return (

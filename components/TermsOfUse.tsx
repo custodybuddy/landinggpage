@@ -1,10 +1,11 @@
 
 import React from 'react';
+import { getFormattedDate } from '../utils/dateUtils';
 
 const TermsOfUse: React.FC = () => {
     return (
         <div className="text-gray-300 text-sm leading-relaxed space-y-4 prose prose-invert prose-p:my-2 prose-ul:my-2 prose-strong:text-amber-400 max-w-none">
-            <p><strong>Last Updated:</strong> {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <p><strong>Last Updated:</strong> {getFormattedDate()}</p>
 
             <p>
                 These Terms of Use ("Terms") govern your access to and use of the CustodyBuddy.com website and its associated AI-powered tools (the "Service"). Please read these Terms carefully. By using the Service, you agree to be bound by these Terms.
