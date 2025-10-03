@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import ClipboardIcon from './icons/ClipboardIcon';
 import ClipboardCheckIcon from './icons/ClipboardCheckIcon';
 import AlertTriangleIcon from './icons/AlertTriangleIcon';
 import XIcon from './icons/XIcon';
+import RotateCwIcon from './icons/RotateCwIcon';
+import { formatMarkdown } from '../utils/markdownParser';
 
 const EXAMPLE_RECEIVED_EMAIL = `Subject: Lily's weekend
 
@@ -29,13 +31,36 @@ Best,
 
 [Your Name]`;
 
-const EmailLawBuddy: React.FC = () => {
+const getFriendlyErrorMessage = (error: unknown): string => {
+    let friendlyMessage = 'An unexpected error occurred while generating the draft. Please try again later.';
+
+    if (error instanceof Error) {
+        const message = error.message.toLowerCase();
+        
+        if (message.includes('api key')) {
+            friendlyMessage = 'The draft generation service is currently unavailable due to a configuration issue. Please try again later or contact support.';
+        } else if (message.includes('fetch') || error.name === 'TypeError') {
+            friendlyMessage = 'A network error occurred, which may be due to an unstable internet connection. Please check your connection and click "Retry".';
+        } else if (message.includes('safety') || message.includes('blocked')) {
+            friendlyMessage = 'Your draft could not be generated due to content safety restrictions. Please review your input for sensitive or inappropriate material and try again.';
+        }
+    }
+    
+    return friendlyMessage;
+};
+
+interface EmailLawBuddyProps {
+    isOpen: boolean;
+}
+
+const EmailLawBuddy: React.FC<EmailLawBuddyProps> = ({ isOpen }) => {
     const [receivedEmail, setReceivedEmail] = useState('');
     const [keyPoints, setKeyPoints] = useState('');
     const [generatedResponse, setGeneratedResponse] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isCopied, setIsCopied] = useState(false);
+    const prevIsOpenRef = useRef(isOpen);
 
     useEffect(() => {
         if (isCopied) {
@@ -43,6 +68,23 @@ const EmailLawBuddy: React.FC = () => {
             return () => clearTimeout(timer);
         }
     }, [isCopied]);
+
+    useEffect(() => {
+        if (prevIsOpenRef.current && !isOpen) {
+            const timer = setTimeout(() => {
+                setReceivedEmail('');
+                setKeyPoints('');
+                setGeneratedResponse('');
+                setIsLoading(false);
+                setError(null);
+                setIsCopied(false);
+            }, 400);
+
+            return () => clearTimeout(timer);
+        }
+
+        prevIsOpenRef.current = isOpen;
+    }, [isOpen]);
 
     const handleGenerate = async () => {
         if (!receivedEmail.trim() || !keyPoints.trim()) {
@@ -107,7 +149,7 @@ ${keyPoints}
 
         } catch (err) {
             console.error("Generation Error:", err);
-            setError('An unexpected error occurred while generating the draft. Please try again.');
+            setError(getFriendlyErrorMessage(err));
         } finally {
             setIsLoading(false);
         }
@@ -172,16 +214,27 @@ ${keyPoints}
             </div>
 
             {error && (
-                <div className="bg-red-900/20 border border-red-500/50 text-red-400 text-sm rounded-lg p-4 flex items-center gap-3 animate-fade-in-up-fast" role="alert">
+                <div className="bg-red-900/20 border border-red-500/50 text-red-400 text-sm rounded-lg p-3 flex items-center gap-3 animate-fade-in-up-fast" role="alert">
                     <AlertTriangleIcon className="w-5 h-5 flex-shrink-0" />
                     <p className="flex-grow">{error}</p>
-                    <button 
-                        onClick={() => setError(null)}
-                        className="text-red-400 hover:text-white transition-colors duration-200"
-                        aria-label="Dismiss error message"
-                    >
-                        <XIcon className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                        <button
+                            onClick={handleGenerate}
+                            disabled={isLoading}
+                            className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white font-semibold py-1 px-3 rounded-md transition-all duration-200 ease-out disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                            aria-label="Retry Draft Generation"
+                        >
+                            <RotateCwIcon className="w-4 h-4" />
+                            <span>Retry</span>
+                        </button>
+                        <button 
+                            onClick={() => setError(null)}
+                            className="text-red-400 hover:text-white transition-colors duration-200"
+                            aria-label="Dismiss error message"
+                        >
+                            <XIcon className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
             )}
 
@@ -216,9 +269,10 @@ ${keyPoints}
                             <span>{isCopied ? 'Copied!' : 'Copy'}</span>
                         </button>
                     </div>
-                    <pre className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans bg-slate-800 p-4 rounded-md">
-                        {generatedResponse}
-                    </pre>
+                    <div 
+                        className="text-gray-300 leading-relaxed prose prose-invert prose-p:my-2 prose-ul:my-2 prose-strong:text-amber-400 max-w-none"
+                        dangerouslySetInnerHTML={{ __html: formatMarkdown(generatedResponse) }}
+                    />
                 </div>
             )}
         </div>

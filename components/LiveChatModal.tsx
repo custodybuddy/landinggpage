@@ -1,6 +1,9 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { GoogleGenAI, LiveServerMessage, Modality, LiveSession } from '@google/genai';
+// FIX: The 'LiveSession' type is not exported from '@google/genai'. It has been removed
+// from the import statement. The 'Blob' type is imported for use in the local
+// LiveSession interface.
+import { GoogleGenAI, LiveServerMessage, Modality, Blob } from '@google/genai';
 import { createBlob, decode, decodeAudioData } from '../utils/audioUtils';
 import XIcon from './icons/XIcon';
 import MicIcon from './icons/MicIcon';
@@ -13,6 +16,13 @@ type Transcription = {
     text: string;
     isFinal: boolean;
 };
+
+// FIX: Since LiveSession is not exported from the library, a local interface is
+// defined based on its usage within this component for type safety.
+interface LiveSession {
+    close(): void;
+    sendRealtimeInput(input: { media: Blob }): void;
+}
 
 const systemInstruction = `You are the "CustodyBuddy AI Legal Assistant," a voice-based AI for CustodyBuddy.com. Your role is to support self-represented parents in Canada navigating high-conflict co-parenting situations.
 

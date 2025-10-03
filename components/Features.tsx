@@ -61,14 +61,14 @@ const Features: React.FC = () => {
                 onClose={() => setIsCaseAnalysisModalOpen(false)}
                 title="Family Law Case Analysis Tool"
             >
-                <CaseAnalysisTool />
+                <CaseAnalysisTool isOpen={isCaseAnalysisModalOpen} />
             </Modal>
             <Modal
                 isOpen={isEmailBuddyModalOpen}
                 onClose={() => setIsEmailBuddyModalOpen(false)}
                 title="Email Law Buddy"
             >
-                <EmailLawBuddy />
+                <EmailLawBuddy isOpen={isEmailBuddyModalOpen} />
             </Modal>
         </>
     );

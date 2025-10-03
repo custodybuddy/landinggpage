@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import XIcon from './icons/XIcon';
 import FileTextIcon from './icons/FileTextIcon';
@@ -6,86 +6,9 @@ import RotateCwIcon from './icons/RotateCwIcon';
 import DownloadIcon from './icons/DownloadIcon';
 import CheckCircleIcon from './icons/CheckCircleIcon';
 import AlertTriangleIcon from './icons/AlertTriangleIcon';
+import { formatMarkdown } from '../utils/markdownParser';
 
-// A robust markdown-to-HTML converter for the expected AI response format.
-const formatMarkdown = (text: string): string => {
-    // This helper for inline formatting handles bold, italic, and code.
-    const processInlineFormatting = (str: string): string => {
-        // Process in order of complexity to avoid conflicts (e.g., ** before *)
-        return str
-            .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>') // Bold + Italic
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')       // Bold
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')         // Italic
-            .replace(/_([^_]+)_/g, '<em>$1</em>')       // Italic (underscore)
-            .replace(/`([^`]+)`/g, '<code class="bg-slate-700 text-amber-300 px-1 py-0.5 rounded text-sm font-mono">$1</code>'); // Inline code
-    };
-
-    const lines = text.split('\n');
-    let html = '';
-    let inList = false;
-    let inCodeBlock = false;
-    let codeBlockContent = '';
-
-    for (const line of lines) {
-        // --- 1. Handle Code Blocks ---
-        // They are self-contained and override other formatting.
-        if (line.trim().startsWith('```')) {
-            if (inCodeBlock) { // Closing fence
-                const escapedCode = codeBlockContent.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                html += `<pre class="bg-slate-950 p-4 rounded-md overflow-x-auto"><code class="text-white text-sm font-mono">${escapedCode.trim()}</code></pre>`;
-                inCodeBlock = false;
-                codeBlockContent = '';
-            } else { // Opening fence
-                if (inList) { // If a list was open, close it first.
-                    html += '</ul>';
-                    inList = false;
-                }
-                inCodeBlock = true;
-            }
-            continue; // Move to next line
-        }
-
-        if (inCodeBlock) {
-            codeBlockContent += line + '\n';
-            continue;
-        }
-
-        // --- 2. Handle List Items ---
-        if (line.trim().startsWith('* ')) {
-            if (!inList) {
-                html += '<ul class="list-disc pl-6 space-y-2">';
-                inList = true;
-            }
-            // Add the list item, processing inline formats on its content
-            html += `<li>${processInlineFormatting(line.trim().substring(2))}</li>`;
-        } 
-        // --- 3. Handle Paragraphs and Other Lines ---
-        else {
-            if (inList) {
-                // Any non-list-item line will terminate the current list.
-                html += '</ul>';
-                inList = false;
-            }
-            if (line.trim()) {
-                // If the line has content, wrap it in a paragraph tag.
-                html += `<p>${processInlineFormatting(line)}</p>`;
-            }
-            // Blank lines effectively just add a separation by closing the list.
-        }
-    }
-
-    // --- 4. Cleanup ---
-    // Ensure any open tags are closed at the end of the text.
-    if (inList) {
-        html += '</ul>';
-    }
-    if (inCodeBlock) { // Failsafe for unclosed code block
-        const escapedCode = codeBlockContent.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        html += `<pre class="bg-slate-950 p-4 rounded-md overflow-x-auto"><code class="text-white text-sm font-mono">${escapedCode.trim()}</code></pre>`;
-    }
-
-    return html;
-};
+// --- Constants for Example Data and System Prompt ---
 
 const EXAMPLE_INPUT = `Clause 7.2 from Separation Agreement:
 
@@ -113,67 +36,7 @@ const EXAMPLE_RESPONSE_MARKDOWN = `**Document Type:** Separation Agreement Claus
 
 Disclaimer: This is an AI-generated analysis and does not constitute legal advice. It is for informational purposes only. You should consult with a qualified legal professional for advice on your specific situation.`;
 
-const UploadCloudIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/>
-    </svg>
-);
-
-const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-            const result = reader.result as string;
-            resolve(result.split(',')[1]);
-        };
-        reader.onerror = (error) => reject(error);
-    });
-};
-
-const getFriendlyErrorMessage = (error: unknown): string => {
-    let friendlyMessage = 'An unexpected error occurred while analyzing your document. Please click "Retry" or try again later.';
-
-    if (error instanceof Error) {
-        const message = error.message.toLowerCase();
-        
-        if (message.includes('api key')) {
-            friendlyMessage = 'The analysis service is currently unavailable due to a configuration issue. Please try again later or contact support.';
-        } else if (message.includes('fetch') || error.name === 'TypeError') {
-            friendlyMessage = 'A network error occurred. Please check your internet connection and click "Retry".';
-        } else if (message.includes('safety') || message.includes('blocked')) {
-            friendlyMessage = 'Your document could not be analyzed due to content safety restrictions. Please review the document for sensitive personal information or inappropriate material and try again.';
-        }
-    }
-    
-    return friendlyMessage;
-};
-
-const CaseAnalysisTool: React.FC = () => {
-    const [query, setQuery] = useState('');
-    const [file, setFile] = useState<File | null>(null);
-    const [response, setResponse] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [isShowingExample, setIsShowingExample] = useState(false);
-    const [isDragging, setIsDragging] = useState(false);
-    const [justDropped, setJustDropped] = useState(false);
-
-    const handleAnalyze = async () => {
-        if (!query.trim() && !file) {
-            setError('Please paste text or upload a document to analyze.');
-            return;
-        }
-
-        setIsLoading(true);
-        setError(null);
-        setResponse('');
-        setIsShowingExample(false);
-
-        try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
-
-            const systemPrompt = `
+const SYSTEM_PROMPT = `
 **SYSTEM INSTRUCTION:**
 You are an AI legal document analysis tool for CustodyBuddy.com, designed for self-represented parents in Canada involved in high-conflict family law cases. Your primary function is to analyze legal and quasi-legal documents (like court orders, separation agreements, or difficult emails) and provide informational breakdowns. You must not provide legal advice.
 
@@ -205,32 +68,144 @@ Analyze the document content provided by the user. Structure your response using
     *   If an obligation is mentioned: "Start a specific log or folder to track [obligation]. For example, if you are required to share medical receipts, keep digital copies in a folder named 'Medical Receipts for [Child's Name] - [Year]'."
 6.  **IMPORTANT DISCLAIMER:** You must conclude your entire response with the following exact, unmodified text: "Disclaimer: This is an AI-generated analysis and does not constitute legal advice. It is for informational purposes only. You should consult with a qualified legal professional for advice on your specific situation."
 `;
-            
-            const parts: ({ text: string } | { inlineData: { mimeType: string; data: string; } })[] = [];
 
-            if (file) {
-                const base64Data = await fileToBase64(file);
-                parts.push({
-                    inlineData: {
-                        mimeType: file.type,
-                        data: base64Data,
-                    }
-                });
-                if (file.type.startsWith('image/')) {
-                    parts.push({ text: "Please extract the text from the attached image of a document and then analyze it." });
-                } else {
-                    parts.push({ text: "Please analyze the attached document." });
-                }
-            } else {
-                parts.push({ text: `**USER'S DOCUMENT TO ANALYZE:**\n${query}` });
+// --- Helper & Utility Functions ---
+
+const UploadCloudIcon: React.FC = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/>
+    </svg>
+);
+
+/** Converts a File object to a Base64 encoded string. */
+const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            const result = reader.result as string;
+            resolve(result.split(',')[1]);
+        };
+        reader.onerror = (error) => reject(error);
+    });
+};
+
+/**
+ * Returns a user-friendly error message based on the type of error caught.
+ * This helps abstract away technical error details from the user.
+ */
+const getFriendlyErrorMessage = (error: unknown): string => {
+    let friendlyMessage = 'An unexpected error occurred while analyzing your document. Please click "Retry" or try again later.';
+
+    if (error instanceof Error) {
+        const message = error.message.toLowerCase();
+        
+        if (message.includes('api key')) {
+            friendlyMessage = 'The analysis service is currently unavailable due to a configuration issue. Please try again later or contact support.';
+        } else if (message.includes('fetch') || error.name === 'TypeError') {
+            friendlyMessage = 'A network error occurred, which may be due to an unstable internet connection. Please check your connection and click "Retry".';
+        } else if (message.includes('safety') || message.includes('blocked')) {
+            friendlyMessage = 'Your document could not be analyzed due to content safety restrictions. Please review the document for sensitive personal information or inappropriate material and try again.';
+        }
+    }
+    
+    return friendlyMessage;
+};
+
+/** Prepares the content parts for the Gemini API request from either a file or a text query. */
+const prepareApiParts = async (file: File | null, query: string): Promise<({ text: string } | { inlineData: { mimeType: string; data: string; } })[]> => {
+    const parts: ({ text: string } | { inlineData: { mimeType: string; data: string; } })[] = [];
+
+    if (file) {
+        const base64Data = await fileToBase64(file);
+        parts.push({
+            inlineData: {
+                mimeType: file.type,
+                data: base64Data,
             }
+        });
+        const promptText = file.type.startsWith('image/')
+            ? "Please extract the text from the attached image of a document and then analyze it."
+            : "Please analyze the attached document.";
+        parts.push({ text: promptText });
+    } else {
+        parts.push({ text: `**USER'S DOCUMENT TO ANALYZE:**\n${query}` });
+    }
+    return parts;
+};
 
+// --- Main Component ---
+
+interface CaseAnalysisToolProps {
+    isOpen: boolean;
+}
+
+const CaseAnalysisTool: React.FC<CaseAnalysisToolProps> = ({ isOpen }) => {
+    const [query, setQuery] = useState('');
+    const [file, setFile] = useState<File | null>(null);
+    const [response, setResponse] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [fileError, setFileError] = useState<string | null>(null);
+    const [isShowingExample, setIsShowingExample] = useState(false);
+    
+    // State for drag-and-drop UI feedback
+    const [isDragging, setIsDragging] = useState(false);
+    const [justDropped, setJustDropped] = useState(false);
+    
+    const prevIsOpenRef = useRef(isOpen);
+
+    /**
+     * When the modal is closed (isOpen becomes false), this effect resets the component's state.
+     * A timeout is used to ensure the state is cleared *after* the closing animation completes,
+     * preventing a visual flash of the cleared state before the modal disappears.
+     */
+    useEffect(() => {
+        if (prevIsOpenRef.current && !isOpen) {
+            const timer = setTimeout(() => {
+                setQuery('');
+                setFile(null);
+                setResponse('');
+                setIsLoading(false);
+                setError(null);
+                setFileError(null);
+                setIsShowingExample(false);
+                setIsDragging(false);
+                setJustDropped(false);
+                // Manually clear the file input element
+                const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+            }, 400); // Duration should match the modal's closing animation
+
+            return () => clearTimeout(timer);
+        }
+
+        prevIsOpenRef.current = isOpen;
+    }, [isOpen]);
+
+    /** Handles the main analysis request to the Gemini API. */
+    const handleAnalyze = async () => {
+        if (!query.trim() && !file) {
+            setError('Please paste text or upload a document to analyze.');
+            return;
+        }
+
+        setIsLoading(true);
+        setError(null);
+        setFileError(null);
+        setResponse('');
+        setIsShowingExample(false);
+
+        try {
+            const parts = await prepareApiParts(file, query);
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+            
             const result = await ai.models.generateContent({
                 model: 'gemini-2.5-flash',
                 contents: { parts },
-                config: {
-                    systemInstruction: systemPrompt,
-                },
+                config: { systemInstruction: SYSTEM_PROMPT },
             });
             
             setResponse(result.text);
@@ -243,45 +218,61 @@ Analyze the document content provided by the user. Structure your response using
         }
     };
 
+    /** Validates and sets the file from an input or drop event. */
+    const processFile = (selectedFile: File) => {
+        const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png', 'image/webp'];
+        const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+        
+        const resetFileInput = () => {
+            const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+            if (fileInput) fileInput.value = '';
+            setFile(null);
+        };
+
+        if (!allowedTypes.includes(selectedFile.type)) {
+            setFileError('Invalid file type. Please upload a PDF, DOCX, JPG, or PNG file.');
+            resetFileInput();
+            return;
+        }
+        if (selectedFile.size > maxSizeInBytes) {
+            setFileError(`File is too large (${(selectedFile.size / 1024 / 1024).toFixed(1)}MB). Maximum size is 10MB.`);
+            resetFileInput();
+            return;
+        }
+
+        // Trigger visual feedback for a successful drop
+        setJustDropped(true);
+        setTimeout(() => setJustDropped(false), 500);
+
+        setFile(selectedFile);
+        setQuery(''); // Ensure text area is clear if a file is uploaded
+        setError(null);
+        setFileError(null);
+        setResponse('');
+        setIsShowingExample(false);
+    };
+    
+    /** Resets the file state and clears the file input element. */
     const clearFile = () => {
         setFile(null);
+        setFileError(null);
         const fileInput = document.getElementById('file-upload') as HTMLInputElement;
         if (fileInput) {
             fileInput.value = '';
         }
     };
-
-    const processFile = (selectedFile: File) => {
-        const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png', 'image/webp'];
-        if (!allowedTypes.includes(selectedFile.type)) {
-            setError('Invalid file type. Please upload a PDF, DOCX, JPG, or PNG file.');
-            clearFile();
-            return;
-        }
-        const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
-        if (selectedFile.size > maxSizeInBytes) {
-            setError(`File is too large (${(selectedFile.size / 1024 / 1024).toFixed(1)}MB). Maximum size is 10MB.`);
-            clearFile();
-            return;
-        }
-
-        setJustDropped(true);
-        setTimeout(() => setJustDropped(false), 500);
-
-        setFile(selectedFile);
-        setQuery('');
+    
+    /** Populates the tool with example data to demonstrate its functionality. */
+    const showExample = () => {
+        setIsShowingExample(true);
+        clearFile();
+        setQuery(EXAMPLE_INPUT);
+        setResponse(EXAMPLE_RESPONSE_MARKDOWN);
         setError(null);
-        setResponse('');
-        setIsShowingExample(false);
+        setFileError(null);
     };
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files?.[0];
-        if (selectedFile) {
-            processFile(selectedFile);
-        }
-    };
-
+    
+    /** Exports the AI's analysis as a plain text file. */
     const handleExportAnalysis = () => {
         if (!response) return;
 
@@ -297,25 +288,25 @@ Analyze the document content provided by the user. Structure your response using
         URL.revokeObjectURL(url);
     };
 
+    // --- Event Handlers for UI Interactions ---
+    
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files?.[0];
+        if (selectedFile) {
+            processFile(selectedFile);
+        }
+    };
 
     const handleQueryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setQuery(e.target.value);
-        if (file) {
-            clearFile();
-        }
+        if (file) clearFile(); // Clear file if user starts typing
         if (isShowingExample) {
             setResponse('');
             setIsShowingExample(false);
         }
     };
-
-    const showExample = () => {
-        setIsShowingExample(true);
-        clearFile();
-        setQuery(EXAMPLE_INPUT);
-        setResponse(EXAMPLE_RESPONSE_MARKDOWN);
-        setError(null);
-    };
+    
+    // --- Drag and Drop Handlers ---
 
     const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -339,13 +330,20 @@ Analyze the document content provided by the user. Structure your response using
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(false);
-    
         if (isLoading || !!query.trim() || !!file) return;
-    
         const droppedFiles = e.dataTransfer.files;
         if (droppedFiles && droppedFiles.length > 0) {
             processFile(droppedFiles[0]);
         }
+    };
+
+    /** Calculates the CSS classes for the dropzone based on its current state. */
+    const getDropzoneClassName = () => {
+        const baseClasses = 'relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 ease-out';
+        if (justDropped) return `${baseClasses} !border-green-500 bg-green-900/20`;
+        if (isDragging) return `${baseClasses} border-amber-400 bg-slate-800 scale-105`;
+        if (isLoading || !!query.trim() || !!file) return `${baseClasses} border-slate-700 opacity-50 cursor-not-allowed`;
+        return `${baseClasses} border-slate-700 hover:border-amber-400`;
     };
 
     return (
@@ -368,10 +366,7 @@ Analyze the document content provided by the user. Structure your response using
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
-                className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 ease-out
-                    ${justDropped ? '!border-green-500 bg-green-900/20' :
-                      isDragging ? 'border-amber-400 bg-slate-800 scale-105' : 'border-slate-700'}
-                    ${(!!query.trim() || !!file) ? 'opacity-50 cursor-not-allowed' : 'hover:border-amber-400'}`}
+                className={getDropzoneClassName()}
             >
                 <input
                     id="file-upload"
@@ -390,6 +385,20 @@ Analyze the document content provided by the user. Structure your response using
                     <p className="text-xs text-gray-400">PDF, DOCX, JPG, PNG (Max 10MB)</p>
                 </div>
             </div>
+
+            {fileError && (
+                <div className="bg-red-900/20 border border-red-500/50 text-red-400 text-sm rounded-lg p-3 flex items-center gap-3 animate-fade-in-up-fast mt-2" role="alert">
+                    <AlertTriangleIcon className="w-5 h-5 flex-shrink-0" />
+                    <p className="flex-grow">{fileError}</p>
+                    <button 
+                        onClick={() => setFileError(null)}
+                        className="text-red-400 hover:text-white transition-colors duration-200"
+                        aria-label="Dismiss file error message"
+                    >
+                        <XIcon className="w-5 h-5" />
+                    </button>
+                </div>
+            )}
 
             {file && (
                 <div className="flex items-center justify-between bg-slate-700 p-3 rounded-lg text-sm animate-fade-in-up-fast border border-slate-600 shadow-md">
