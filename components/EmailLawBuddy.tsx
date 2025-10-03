@@ -2,9 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useEmailBuddy } from '../hooks/useEmailBuddy';
 import EmailAnalysisDisplay from './email-buddy/EmailAnalysisDisplay';
 import DraftingStation from './email-buddy/DraftingStation';
+import JargonHelper from './email-buddy/JargonHelper';
 import AlertTriangleIcon from './icons/AlertTriangleIcon';
 import XIcon from './icons/XIcon';
 import RotateCwIcon from './icons/RotateCwIcon';
+import {
+    exampleReceivedEmail,
+    exampleAnalysis,
+    exampleKeyPoints,
+    exampleDrafts
+} from '../constants/exampleData';
 
 // Define and export types for child components
 export interface Analysis {
@@ -12,49 +19,20 @@ export interface Analysis {
     summary: string;
     key_demands: string[];
     key_points_suggestion: string;
+    legal_jargon?: Array<{
+        term: string;
+        context: string;
+    }>;
 }
-export type ToneOption = 'BIFF' | 'Grey Rock';
 
-// Example data
-const exampleReceivedEmail = `Subject: URGENT - Weekend Schedule
-
-You were 15 minutes late for pickup last Friday. This is unacceptable and a violation of our agreement. The kids were upset.
-
-I'm taking them to a birthday party on Saturday at 2 PM, so I need you to drop them off at my house at 1 PM instead of the usual 6 PM. This is non-negotiable as I've already RSVP'd.
-
-Also, you still haven't paid me for the dentist appointment from two weeks ago. I need that money by tomorrow.`;
-
-const exampleAnalysis: Analysis = {
-    tone: "Demanding and Accusatory",
-    summary: "The sender is making accusations about tardiness, unilaterally changing the weekend schedule, and demanding payment.",
-    key_demands: [
-        "Drop kids off at 1 PM on Saturday instead of 6 PM.",
-        "Pay for the dentist appointment by tomorrow."
-    ],
-    key_points_suggestion: `- Respond to the demand: "Drop kids off at 1 PM on Saturday instead of 6 PM."\n- Respond to the demand: "Pay for the dentist appointment by tomorrow."`
-};
-
-const exampleKeyPoints = `1. I will adhere to the court-ordered exchange time of Saturday at 6 PM. I cannot accommodate the 1 PM change.
-2. The dentist payment was sent via e-transfer this morning. Please check your email.
-3. I was 10 minutes late, not 15, due to unexpected traffic. I texted you that I was running late.`;
-
-const exampleDrafts = {
-    'BIFF': `Subject: Re: URGENT - Weekend Schedule
-
-Hi [Co-Parent's Name],
-
-Thanks for the update.
-
-Per our court order, I will be dropping the children off at the regular time of 6 PM on Saturday. I'm not able to change the time this weekend.
-
-Regarding the dentist payment, the e-transfer was sent this morning. The confirmation number is #12345.
-
-Best,
-[Your Name]`,
-    'Grey Rock': `Subject: Re: URGENT - Weekend Schedule
-
-Noted. I will see you at 6 PM on Saturday as per the schedule. The payment was sent.`,
-};
+export type ToneOption =
+    | 'BIFF'
+    | 'Grey Rock'
+    | 'Friendly Assertive'
+    | 'Professional (for Lawyers)'
+    | 'Passive'
+    | 'Passive-Aggressive'
+    | 'Aggressive';
 
 const EmailLawBuddy: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
     const { 
@@ -160,6 +138,9 @@ const EmailLawBuddy: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
                         </button>
                     </div>
                     <EmailAnalysisDisplay analysis={currentAnalysis} />
+                    {currentAnalysis.legal_jargon && currentAnalysis.legal_jargon.length > 0 && (
+                        <JargonHelper jargon={currentAnalysis.legal_jargon} />
+                    )}
                     <DraftingStation 
                         receivedEmail={isShowingExample ? exampleReceivedEmail : receivedEmail}
                         initialKeyPoints={currentKeyPoints}

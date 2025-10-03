@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { routes, externalLinks, NavLink } from './routes';
+import { ModalProvider } from './contexts/ModalContext';
+import GlobalModals from './components/GlobalModals';
 
 const App: React.FC = () => {
     const [route, setRoute] = useState(window.location.hash || '#/');
@@ -42,13 +44,16 @@ const App: React.FC = () => {
     ];
 
     return (
-        <div className="bg-slate-900 text-white">
-            <Header currentPath={route} navLinks={headerNavLinks} />
-            <main>
-                <PageComponent />
-            </main>
-            <Footer currentPath={route} navLinks={footerNavLinks} />
-        </div>
+        <ModalProvider>
+            <div className="bg-slate-900 text-white">
+                <Header currentPath={route} navLinks={headerNavLinks} />
+                <main>
+                    <PageComponent />
+                </main>
+                <Footer currentPath={route} navLinks={footerNavLinks} />
+                <GlobalModals />
+            </div>
+        </ModalProvider>
     );
 };
 

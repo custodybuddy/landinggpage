@@ -20,8 +20,22 @@ interface DraftingStationProps {
     initialKeyPoints: string;
     isShowingExample: boolean;
     exampleKeyPoints: string;
-    exampleDrafts: Record<ToneOption, string>;
+    exampleDrafts: Record<string, string>;
 }
+
+const toneOptions: { tone: ToneOption, recommended: boolean }[] = [
+    { tone: 'BIFF', recommended: true },
+    { tone: 'Grey Rock', recommended: true },
+    { tone: 'Friendly Assertive', recommended: true },
+    { tone: 'Professional (for Lawyers)', recommended: true },
+    { tone: 'Passive', recommended: false },
+    { tone: 'Passive-Aggressive', recommended: false },
+    { tone: 'Aggressive', recommended: false },
+];
+
+const recommendedTones = toneOptions.filter(t => t.recommended);
+const otherTones = toneOptions.filter(t => !t.recommended);
+
 
 const DraftingStation: React.FC<DraftingStationProps> = ({ 
     receivedEmail,
@@ -127,6 +141,69 @@ ${keyPoints}
         cancel();
     };
 
+    const renderDraftButtons = (tones: typeof toneOptions) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {tones.map(({ tone, recommended }) => (
+                <div key={tone} className="flex flex-col">
+                    <button
+                        onClick={() => handleGenerateDraft(tone)}
+                        disabled={isLoading || !keyPoints.trim()}
+                        className="bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white font-bold py-2 px-4 rounded-t-lg transition-all duration-200 ease-out disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center w-full"
+                    >
+                        {isLoading && activeDraftTone === tone ? (
+                             <>
+                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                Drafting...
+                            </>
+                        ) : (
+                            <span>
+                                Generate {tone}
+                                {!recommended && <span className="text-xs text-gray-400"> (not recommended)</span>}
+                            </span>
+                        )}
+                    </button>
+                     {drafts[tone] && (
+                        <div className="p-4 bg-slate-900 border border-t-0 border-slate-700 rounded-b-lg animate-fade-in-up relative flex flex-col h-full">
+                            <div className="absolute top-2 right-2 flex gap-2">
+                                <button
+                                    onClick={() => handlePlayPause(tone, drafts[tone])}
+                                    className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-1 px-2 rounded-md transition-all text-xs"
+                                    aria-label={(!isSpeaking || speakingDraft !== tone) ? `Read ${tone} draft` : isPaused ? `Resume ${tone} draft` : `Pause ${tone} draft`}
+                                >
+                                    {(!isSpeaking || speakingDraft !== tone || isPaused) ? <SpeakerIcon className="w-4 h-4" /> : <PauseIcon className="w-4 h-4" />}
+                                    <span>{(!isSpeaking || speakingDraft !== tone) ? 'Read' : isPaused ? 'Resume' : 'Pause'}</span>
+                                </button>
+                                {isSpeaking && speakingDraft === tone && (
+                                     <button
+                                        onClick={handleStop}
+                                        className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-1 px-2 rounded-md transition-all text-xs"
+                                        aria-label="Stop reading draft"
+                                    >
+                                        <StopCircleIcon className="w-4 h-4" />
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => handleCopy(drafts[tone])}
+                                    className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-1 px-2 rounded-md transition-all text-xs"
+                                    aria-label={`Copy ${tone} draft to clipboard`}
+                                >
+                                    {isCopied ? <ClipboardCheckIcon /> : <ClipboardIcon />}
+                                    <span>{isCopied ? 'Copied!' : 'Copy'}</span>
+                                </button>
+                            </div>
+                            <div 
+                                className="text-gray-300 leading-relaxed prose prose-invert prose-p:my-2 prose-strong:text-amber-400 max-w-none text-sm pt-8 flex-grow"
+                                dangerouslySetInnerHTML={{ __html: formatMarkdown(drafts[tone]) }}
+                            />
+                            <div className="mt-auto pt-4">
+                                <Feedback />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
     
     return (
         <div className="space-y-6">
@@ -152,64 +229,16 @@ ${keyPoints}
             )}
 
             <div className="space-y-4">
-                <h4 className="text-md font-semibold text-gray-200">Choose a Response Style:</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {(['BIFF', 'Grey Rock'] as ToneOption[]).map(tone => (
-                        <div key={tone} className="flex flex-col">
-                            <button
-                                onClick={() => handleGenerateDraft(tone)}
-                                disabled={isLoading || !keyPoints.trim()}
-                                className="bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white font-bold py-2 px-4 rounded-t-lg transition-all duration-200 ease-out disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center w-full"
-                            >
-                                {isLoading && activeDraftTone === tone ? (
-                                     <>
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                        Drafting...
-                                    </>
-                                ) : (
-                                    `Generate ${tone} Draft`
-                                )}
-                            </button>
-                             {drafts[tone] && (
-                                <div className="p-4 bg-slate-900 border border-t-0 border-slate-700 rounded-b-lg animate-fade-in-up relative flex flex-col h-full">
-                                    <div className="absolute top-2 right-2 flex gap-2">
-                                        <button
-                                            onClick={() => handlePlayPause(tone, drafts[tone])}
-                                            className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-1 px-2 rounded-md transition-all text-xs"
-                                            aria-label={(!isSpeaking || speakingDraft !== tone) ? `Read ${tone} draft` : isPaused ? `Resume ${tone} draft` : `Pause ${tone} draft`}
-                                        >
-                                            {(!isSpeaking || speakingDraft !== tone || isPaused) ? <SpeakerIcon className="w-4 h-4" /> : <PauseIcon className="w-4 h-4" />}
-                                            <span>{(!isSpeaking || speakingDraft !== tone) ? 'Read' : isPaused ? 'Resume' : 'Pause'}</span>
-                                        </button>
-                                        {isSpeaking && speakingDraft === tone && (
-                                             <button
-                                                onClick={handleStop}
-                                                className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-1 px-2 rounded-md transition-all text-xs"
-                                                aria-label="Stop reading draft"
-                                            >
-                                                <StopCircleIcon className="w-4 h-4" />
-                                            </button>
-                                        )}
-                                        <button
-                                            onClick={() => handleCopy(drafts[tone])}
-                                            className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-1 px-2 rounded-md transition-all text-xs"
-                                            aria-label={`Copy ${tone} draft to clipboard`}
-                                        >
-                                            {isCopied ? <ClipboardCheckIcon /> : <ClipboardIcon />}
-                                            <span>{isCopied ? 'Copied!' : 'Copy'}</span>
-                                        </button>
-                                    </div>
-                                    <div 
-                                        className="text-gray-300 leading-relaxed prose prose-invert prose-p:my-2 prose-strong:text-amber-400 max-w-none text-sm pt-8 flex-grow"
-                                        dangerouslySetInnerHTML={{ __html: formatMarkdown(drafts[tone]) }}
-                                    />
-                                    <div className="mt-auto pt-4">
-                                        <Feedback />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                <div>
+                    <h4 className="text-md font-semibold text-gray-200 mb-2">Recommended Styles</h4>
+                    <p className="text-xs text-gray-400 mb-3">These tones are generally best for creating a strong, positive legal record.</p>
+                    {renderDraftButtons(recommendedTones)}
+                </div>
+                
+                <div className="pt-4 border-t border-slate-700">
+                    <h4 className="text-md font-semibold text-gray-200 mb-2">Other Styles</h4>
+                    <p className="text-xs text-gray-400 mb-3">Use with caution. These tones can sometimes escalate conflict and may not be viewed favorably in court.</p>
+                    {renderDraftButtons(otherTones)}
                 </div>
             </div>
         </div>

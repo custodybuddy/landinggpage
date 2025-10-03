@@ -3,6 +3,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { fileToDataUrl, pdfToText } from '../utils/fileUtils';
 import { IncidentData, IncidentReport } from '../hooks/useIncidentReporter';
+import { jargonExplanationSystemPrompt } from '../prompts';
 
 // Fix: Initialize the Gemini client and export it for use in other parts of the app (e.g., live chat).
 // The API key is now correctly sourced from environment variables as per guidelines.
@@ -92,6 +93,18 @@ export const analyzeEmail = async (emailContent: string, systemPrompt: string): 
                         type: Type.ARRAY,
                         description: "A list of clear, actionable demands or questions made in the email. Extract these as direct, concise points.",
                         items: { type: Type.STRING }
+                    },
+                    legal_jargon: {
+                        type: Type.ARRAY,
+                        description: "An optional list of legal jargon found in the email.",
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                term: { type: Type.STRING, description: "The specific legal term identified." },
+                                context: { type: Type.STRING, description: "The surrounding sentence where the term was found." }
+                            },
+                            required: ['term', 'context']
+                        }
                     }
                 },
                 required: ['tone', 'summary', 'key_demands']
@@ -184,6 +197,39 @@ ${incidentData.narrative}
                     }
                 },
                 required: ['professionalSummary', 'observedImpact', 'legalInsights']
+            }
+        },
+    });
+
+    return JSON.parse(response.text);
+};
+
+/**
+ * Explains a legal term and suggests a clarification question using Gemini.
+ * @param term The legal term to explain.
+ * @param context The context in which the term was used.
+ * @returns A promise that resolves to an object with the explanation and suggested question.
+ */
+export const explainJargon = async (term: string, context: string): Promise<{ explanation: string; suggested_question: string; }> => {
+    const userPrompt = `Please explain the following legal term:
+
+Term: "${term}"
+Context: "${context}"
+`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: userPrompt,
+        config: {
+            systemInstruction: jargonExplanationSystemPrompt,
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    explanation: { type: Type.STRING, description: "A clear, simple explanation of the legal term." },
+                    suggested_question: { type: Type.STRING, description: "A polite, BIFF-style question for clarification." }
+                },
+                required: ['explanation', 'suggested_question']
             }
         },
     });

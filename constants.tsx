@@ -1,14 +1,9 @@
 import React from 'react';
-import CalendarCheckIcon from './components/icons/CalendarCheckIcon';
-import SwordsIcon from './components/icons/SwordsIcon';
-import ShieldHalfIcon from './components/icons/ShieldHalfIcon';
-import ScaleIcon from './components/icons/ScaleIcon';
-import MailPlusIcon from './components/icons/MailPlusIcon';
 
 export const features = [
     {
         id: 'report-incident',
-        icon: <CalendarCheckIcon />,
+        icon: 'CalendarCheck',
         title: <>Report An Incident: <span className="text-amber-400">Catch Them</span> Red-Handed.</>,
         description: 'Transform toxic behavior into court-ready evidence with guided documentation, timestamps, and professional exports.',
         buttonText: 'DOCUMENT THEIR LIES',
@@ -16,7 +11,7 @@ export const features = [
     },
     {
         id: 'case-analysis',
-        icon: <SwordsIcon />,
+        icon: 'Swords',
         title: <>Family Law Case Analysis Tool: Level the <span className="text-amber-400">Playing Field</span>.</>,
         description: 'Decode legal documents with AI analysis, get plain English explanations, and receive next-step recommendations.',
         buttonText: 'EXPOSE THE TRUTH',
@@ -24,7 +19,7 @@ export const features = [
     },
     {
         id: 'email-buddy',
-        icon: <MailPlusIcon />,
+        icon: 'MailPlus',
         title: <>Email Law Buddy: <span className="text-amber-400">Shut Down</span> the Games.</>,
         description: 'Stop emotional manipulation with professional, AI-drafted responses that maintain composure and build your legal case.',
         buttonText: 'STOP THE GAMES',
