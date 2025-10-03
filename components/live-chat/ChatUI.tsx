@@ -57,7 +57,14 @@ const ChatUI: React.FC<ChatUIProps> = ({
 
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // Enhanced scroll-to-bottom behavior with smooth scrolling.
+    // Determine if the AI is 'thinking' (i.e., user has spoken, AI has not yet replied)
+    const isModelThinking = isRecording &&
+                            !currentInterimTranscript &&
+                            !currentModelTranscript &&
+                            transcriptHistory.length > 0 &&
+                            transcriptHistory[transcriptHistory.length - 1].speaker === 'user';
+
+    // Auto-scroll to bottom on new content
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTo({
@@ -65,7 +72,7 @@ const ChatUI: React.FC<ChatUIProps> = ({
                 behavior: 'smooth'
             });
         }
-    }, [transcriptHistory, currentInterimTranscript, currentModelTranscript]);
+    }, [transcriptHistory, currentInterimTranscript, currentModelTranscript, isModelThinking]);
 
     const getMicButtonStatus = () => {
         if (isConnecting) return "Connecting...";
@@ -103,7 +110,8 @@ const ChatUI: React.FC<ChatUIProps> = ({
                 {transcriptHistory.map((entry, index) => (
                     <ChatMessage key={index} entry={entry} />
                 ))}
-                {/* Updated styling for interim user transcript */}
+
+                {/* User's in-progress message */}
                 {currentInterimTranscript && (
                     <div className="flex gap-3 my-4 justify-end">
                         <div className="p-3 rounded-lg max-w-sm md:max-w-md bg-amber-500 text-black">
@@ -111,15 +119,27 @@ const ChatUI: React.FC<ChatUIProps> = ({
                         </div>
                     </div>
                 )}
-                {/* Updated styling for interim model transcript with typing indicator */}
+                
+                {/* AI is thinking indicator */}
+                {isModelThinking && (
+                    <div className="flex gap-3 my-4 justify-start">
+                        <div className="w-8 h-8 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center flex-shrink-0">
+                            <UsersIcon />
+                        </div>
+                        <div className="p-3 rounded-lg max-w-sm md:max-w-md bg-slate-700 text-white flex items-center">
+                            <TypingIndicator className="text-gray-400" />
+                        </div>
+                    </div>
+                )}
+
+                {/* AI's in-progress message */}
                 {currentModelTranscript && (
                     <div className="flex gap-3 my-4 justify-start">
                          <div className="w-8 h-8 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center flex-shrink-0">
                             <UsersIcon />
                         </div>
-                        <div className="p-3 rounded-lg max-w-sm md:max-w-md bg-slate-700 text-white flex items-center gap-2">
+                        <div className="p-3 rounded-lg max-w-sm md:max-w-md bg-slate-700 text-white">
                             <p className="text-sm">{currentModelTranscript}</p>
-                            <TypingIndicator className="text-gray-300" />
                         </div>
                     </div>
                 )}

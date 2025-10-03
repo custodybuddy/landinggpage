@@ -1,7 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import MenuIcon from './icons/MenuIcon';
+import BookOpenIcon from './icons/BookOpenIcon';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+    onOpenTemplateLibrary: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onOpenTemplateLibrary }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
@@ -19,8 +25,16 @@ const Header: React.FC = () => {
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
+    const handleNavLinkClick = (e: React.MouseEvent, onClick?: () => void) => {
+        if (onClick) {
+            e.preventDefault();
+            onClick();
+        }
+    };
+
     const navLinks = [
         { href: '#features', text: 'Features' },
+        { href: '#', text: 'Template Library', onClick: onOpenTemplateLibrary },
         { href: '#social-proof', text: 'Testimonials' },
         { href: '#donation', text: 'Donate' },
         { href: 'https://blog.custodybuddy.com', text: 'Blog', external: true },
@@ -41,10 +55,12 @@ const Header: React.FC = () => {
                              <a 
                                 key={link.text} 
                                 href={link.href} 
-                                className="hover:text-amber-400 transition-colors duration-200 ease-out" 
+                                className="hover:text-amber-400 transition-colors duration-200 ease-out flex items-center gap-1.5" 
                                 target={link.external ? '_blank' : '_self'} 
                                 rel={link.external ? 'noopener noreferrer' : ''}
+                                onClick={(e) => handleNavLinkClick(e, link.onClick)}
                             >
+                                {link.text === 'Template Library' && <BookOpenIcon className="w-4 h-4" />}
                                 {link.text}
                             </a>
                         ))}
@@ -66,11 +82,15 @@ const Header: React.FC = () => {
                          <a 
                             key={link.text} 
                             href={link.href} 
-                            className="hover:text-amber-400 transition-colors duration-200 ease-out" 
+                            className="hover:text-amber-400 transition-colors duration-200 ease-out flex items-center justify-center gap-2" 
                             target={link.external ? '_blank' : '_self'} 
                             rel={link.external ? 'noopener noreferrer' : ''}
-                            onClick={toggleMenu}
+                            onClick={(e) => {
+                                handleNavLinkClick(e, link.onClick);
+                                toggleMenu();
+                            }}
                         >
+                            {link.text === 'Template Library' && <BookOpenIcon className="w-5 h-5" />}
                             {link.text}
                         </a>
                     ))}

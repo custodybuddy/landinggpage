@@ -1,6 +1,7 @@
 // Fix: Refactor the entire AI service to use the @google/genai SDK instead of OpenAI.
 import { GoogleGenAI, Type } from "@google/genai";
 import { fileToDataUrl, pdfToText } from '../utils/fileUtils';
+import { IncidentData, IncidentReport } from '../hooks/useIncidentReporter';
 
 // Fix: Initialize the Gemini client and export it for use in other parts of the app (e.g., live chat).
 // The API key is now correctly sourced from environment variables as per guidelines.
@@ -116,4 +117,57 @@ export const generateDraftEmail = async (userPrompt: string, systemPrompt: strin
         }
     });
     return response.text;
+};
+
+/**
+ * Generates a structured incident report from a user's narrative using Gemini's JSON mode.
+ * @param incidentData - The raw data of the incident provided by the user.
+ * @param systemPrompt - The system instruction for the AI model.
+ * @returns A promise that resolves to the parsed JSON object of the incident report.
+ */
+export const generateIncidentReport = async (incidentData: IncidentData, systemPrompt: string): Promise<IncidentReport> => {
+    const userPrompt = `
+Please analyze the following incident and generate a structured report.
+
+**Incident Date & Time:** ${incidentData.dateTime}
+**Location:** ${incidentData.location}
+**Parties Involved:** ${incidentData.involvedParties}
+**Jurisdiction for Legal Context:** ${incidentData.jurisdiction}
+
+**User's Narrative of the Incident:**
+---
+${incidentData.narrative}
+---
+`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: userPrompt,
+        config: {
+            systemInstruction: systemPrompt,
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    professionalSummary: {
+                        type: Type.STRING,
+                        description: "A comprehensive 2-3 paragraph professional summary of the incident, removing emotional language but preserving all factual details."
+                    },
+                    observedImpact: {
+                        type: Type.ARRAY,
+                        description: "A list of observable impacts on the children or the parenting arrangement, based on the narrative.",
+                        items: { type: Type.STRING }
+                    },
+                    legalInsights: {
+                        type: Type.ARRAY,
+                        description: "A list of potential legal concepts or violations relevant to the incident, specific to the provided jurisdiction.",
+                        items: { type: Type.STRING }
+                    }
+                },
+                required: ['professionalSummary', 'observedImpact', 'legalInsights']
+            }
+        },
+    });
+
+    return JSON.parse(response.text);
 };

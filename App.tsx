@@ -8,15 +8,15 @@ import Resources from './components/Resources';
 import Donation from './components/Donation';
 import CTA from './components/CTA';
 import Footer from './components/Footer';
-import LiveChatWidget from './components/LiveChatWidget';
-import LiveChatModal from './components/LiveChatModal';
+import Modal from './components/Modal';
+import TemplateLibrary from './components/TemplateLibrary';
 
 const App: React.FC = () => {
-    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [isTemplateLibraryModalOpen, setIsTemplateLibraryModalOpen] = useState(false);
 
     return (
         <div className="bg-slate-900 text-white">
-            <Header />
+            <Header onOpenTemplateLibrary={() => setIsTemplateLibraryModalOpen(true)} />
             <main>
                 <Hero />
                 <Features />
@@ -26,8 +26,14 @@ const App: React.FC = () => {
                 <CTA />
             </main>
             <Footer />
-            <LiveChatWidget onOpen={() => setIsChatOpen(true)} />
-            <LiveChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+
+            <Modal
+                isOpen={isTemplateLibraryModalOpen}
+                onClose={() => setIsTemplateLibraryModalOpen(false)}
+                title="Email Template Library"
+            >
+                <TemplateLibrary isOpen={isTemplateLibraryModalOpen} />
+            </Modal>
         </div>
     );
 };

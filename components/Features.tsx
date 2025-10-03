@@ -3,10 +3,12 @@ import { features } from '../constants';
 import Modal from './Modal';
 import CaseAnalysisTool from './CaseAnalysisTool';
 import EmailLawBuddy from './EmailLawBuddy';
+import ReportAnIncident from './report-incident/ReportAnIncident';
 
 const Features: React.FC = () => {
     const [isCaseAnalysisModalOpen, setIsCaseAnalysisModalOpen] = useState(false);
     const [isEmailBuddyModalOpen, setIsEmailBuddyModalOpen] = useState(false);
+    const [isReportIncidentModalOpen, setIsReportIncidentModalOpen] = useState(false);
 
     const handleButtonClick = (featureId: string) => {
         if (featureId === 'case-analysis') {
@@ -14,6 +16,9 @@ const Features: React.FC = () => {
         }
         if (featureId === 'email-buddy') {
             setIsEmailBuddyModalOpen(true);
+        }
+        if (featureId === 'report-incident') {
+            setIsReportIncidentModalOpen(true);
         }
     };
     
@@ -34,7 +39,7 @@ const Features: React.FC = () => {
                                     {feature.title}
                                 </h3>
                                 <p className="text-gray-400 mb-4 flex-grow text-balance">{feature.description}</p>
-                                {feature.id === 'case-analysis' || feature.id === 'email-buddy' ? (
+                                {feature.id === 'case-analysis' || feature.id === 'email-buddy' || feature.id === 'report-incident' ? (
                                     <button
                                         onClick={() => handleButtonClick(feature.id)}
                                         className="inline-block bg-amber-400 text-black font-semibold py-2 px-6 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 motion-safe:active:scale-95 mt-auto focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-800"
@@ -69,6 +74,13 @@ const Features: React.FC = () => {
                 title="Email Law Buddy"
             >
                 <EmailLawBuddy isOpen={isEmailBuddyModalOpen} />
+            </Modal>
+            <Modal
+                isOpen={isReportIncidentModalOpen}
+                onClose={() => setIsReportIncidentModalOpen(false)}
+                title="Report An Incident"
+            >
+                <ReportAnIncident isOpen={isReportIncidentModalOpen} />
             </Modal>
         </>
     );
