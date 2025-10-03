@@ -1,4 +1,3 @@
-
 import React, { useState, lazy, Suspense } from 'react';
 import { features } from '../constants';
 import Modal from './Modal';

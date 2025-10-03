@@ -1,7 +1,14 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import MenuIcon from './icons/MenuIcon';
 import BookOpenIcon from './icons/BookOpenIcon';
+
+interface NavLink {
+    href: string;
+    text: string;
+    onClick?: () => void;
+    external?: boolean;
+}
 
 interface HeaderProps {
     onOpenTemplateLibrary: () => void;
@@ -10,6 +17,8 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onOpenTemplateLibrary }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [isAnimatingTemplateButton, setIsAnimatingTemplateButton] = useState(false);
+    const animationTimeoutRef = useRef<number | null>(null);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -19,20 +28,22 @@ const Header: React.FC<HeaderProps> = ({ onOpenTemplateLibrary }) => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Clear timeout on unmount to prevent memory leaks
+    useEffect(() => {
+        return () => {
+            if (animationTimeoutRef.current) {
+                clearTimeout(animationTimeoutRef.current);
+            }
+        };
+    }, []);
+
     const navClass = isScrolled
         ? 'fixed top-0 left-0 w-full z-50 bg-slate-900/80 backdrop-blur-sm shadow-md transition-all duration-300'
         : 'fixed top-0 left-0 w-full z-50 bg-transparent transition-all duration-300';
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-    const handleNavLinkClick = (e: React.MouseEvent, onClick?: () => void) => {
-        if (onClick) {
-            e.preventDefault();
-            onClick();
-        }
-    };
-
-    const navLinks = [
+    const navLinks: NavLink[] = [
         { href: '#features', text: 'Features' },
         { href: '#', text: 'Template Library', onClick: onOpenTemplateLibrary },
         { href: '#social-proof', text: 'Testimonials' },
@@ -40,6 +51,25 @@ const Header: React.FC<HeaderProps> = ({ onOpenTemplateLibrary }) => {
         { href: 'https://blog.custodybuddy.com', text: 'Blog', external: true },
         { href: '#contact', text: 'Contact' },
     ];
+    
+    const handleNavLinkClick = (e: React.MouseEvent, link: NavLink) => {
+        if (link.onClick) {
+            e.preventDefault();
+
+            // Specifically trigger animation for the Template Library button
+            if (link.text === 'Template Library') {
+                setIsAnimatingTemplateButton(true);
+                if (animationTimeoutRef.current) {
+                    clearTimeout(animationTimeoutRef.current);
+                }
+                animationTimeoutRef.current = window.setTimeout(() => {
+                    setIsAnimatingTemplateButton(false);
+                }, 400); // Duration should match the animation in CSS
+            }
+            
+            link.onClick();
+        }
+    };
 
     return (
         <>
@@ -59,10 +89,10 @@ const Header: React.FC<HeaderProps> = ({ onOpenTemplateLibrary }) => {
                                 <a 
                                     key={link.text} 
                                     href={link.href} 
-                                    className="hover:text-amber-400 transition-colors duration-200 ease-out flex items-center gap-1.5 text-sm font-semibold" 
+                                    className={`hover:text-amber-400 transition-colors duration-200 ease-out flex items-center gap-1.5 text-sm font-semibold ${link.text === 'Template Library' && isAnimatingTemplateButton ? 'animate-subtle-bounce' : ''}`} 
                                     target={link.external ? '_blank' : '_self'} 
                                     rel={link.external ? 'noopener noreferrer' : ''}
-                                    onClick={(e) => handleNavLinkClick(e, link.onClick)}
+                                    onClick={(e) => handleNavLinkClick(e, link)}
                                 >
                                     {link.text === 'Template Library' && <BookOpenIcon className="w-4 h-4" />}
                                     {link.text}
@@ -97,7 +127,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenTemplateLibrary }) => {
                             target={link.external ? '_blank' : '_self'} 
                             rel={link.external ? 'noopener noreferrer' : ''}
                             onClick={(e) => {
-                                handleNavLinkClick(e, link.onClick);
+                                handleNavLinkClick(e, link);
                                 toggleMenu();
                             }}
                         >

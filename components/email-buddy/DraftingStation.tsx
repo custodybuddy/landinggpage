@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import ClipboardIcon from '../icons/ClipboardIcon';
 import ClipboardCheckIcon from '../icons/ClipboardCheckIcon';
@@ -15,6 +13,7 @@ import { useTextToSpeech } from '../../hooks/useTextToSpeech';
 import { ToneOption } from '../EmailLawBuddy';
 import Feedback from '../Feedback';
 import { cleanEmailForSpeech } from '../../utils/stringUtils';
+import PauseIcon from '../icons/PauseIcon';
 
 interface DraftingStationProps {
     receivedEmail: string;
@@ -39,7 +38,7 @@ const DraftingStation: React.FC<DraftingStationProps> = ({
     const [isCopied, setIsCopied] = useState(false);
     const [speakingDraft, setSpeakingDraft] = useState<ToneOption | null>(null);
 
-    const { isSpeaking, speak, cancel } = useTextToSpeech({
+    const { isSpeaking, isPaused, speak, cancel, pause, resume } = useTextToSpeech({
         onEnd: () => setSpeakingDraft(null)
     });
 
@@ -109,16 +108,25 @@ ${keyPoints}
         }
     };
 
-    const handleReadAloud = (tone: ToneOption, text: string) => {
-        if (isSpeaking && speakingDraft === tone) {
-            cancel();
-            setSpeakingDraft(null);
-        } else {
+    const handlePlayPause = (tone: ToneOption, text: string) => {
+        if (speakingDraft !== tone) {
+            // another draft is playing, or nothing is playing. Start this one.
             const cleanText = cleanEmailForSpeech(text);
             speak(cleanText);
             setSpeakingDraft(tone);
+        } else { // this draft is the active one
+            if (isPaused) {
+                resume();
+            } else {
+                pause();
+            }
         }
     };
+
+    const handleStop = () => {
+        cancel();
+    };
+
     
     return (
         <div className="space-y-6">
@@ -164,30 +172,24 @@ ${keyPoints}
                             </button>
                              {drafts[tone] && (
                                 <div className="p-4 bg-slate-900 border border-t-0 border-slate-700 rounded-b-lg animate-fade-in-up relative flex flex-col h-full">
-                                    {isShowingExample && (
-                                        <div className="mb-4 p-3 bg-slate-800 border border-amber-500/30 rounded-lg text-xs text-gray-300">
-                                            <h5 className="font-bold text-amber-400 mb-1">Why this works ({tone}):</h5>
-                                            {tone === 'BIFF' ? (
-                                                <ul className="list-disc list-inside space-y-1">
-                                                    <li><strong>Brief:</strong> Short and to the point.</li>
-                                                    <li><strong>Informative:</strong> Corrects the record and confirms the schedule.</li>
-                                                    <li><strong>Friendly:</strong> The tone is neutral and business-like.</li>
-                                                    <li><strong>Firm:</strong> Ends the conversation, leaving no room for argument.</li>
-                                                </ul>
-                                            ) : (
-                                                <p>It's extremely short and factual. It offers no emotional reaction for the other person to latch onto, effectively shutting down manipulation.</p>
-                                            )}
-                                        </div>
-                                    )}
                                     <div className="absolute top-2 right-2 flex gap-2">
                                         <button
-                                            onClick={() => handleReadAloud(tone, drafts[tone])}
+                                            onClick={() => handlePlayPause(tone, drafts[tone])}
                                             className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-1 px-2 rounded-md transition-all text-xs"
-                                            aria-label={`Read ${tone} draft aloud`}
+                                            aria-label={(!isSpeaking || speakingDraft !== tone) ? `Read ${tone} draft` : isPaused ? `Resume ${tone} draft` : `Pause ${tone} draft`}
                                         >
-                                            {isSpeaking && speakingDraft === tone ? <StopCircleIcon className="w-4 h-4" /> : <SpeakerIcon className="w-4 h-4" />}
-                                            <span>{isSpeaking && speakingDraft === tone ? 'Stop' : 'Read'}</span>
+                                            {(!isSpeaking || speakingDraft !== tone || isPaused) ? <SpeakerIcon className="w-4 h-4" /> : <PauseIcon className="w-4 h-4" />}
+                                            <span>{(!isSpeaking || speakingDraft !== tone) ? 'Read' : isPaused ? 'Resume' : 'Pause'}</span>
                                         </button>
+                                        {isSpeaking && speakingDraft === tone && (
+                                             <button
+                                                onClick={handleStop}
+                                                className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-1 px-2 rounded-md transition-all text-xs"
+                                                aria-label="Stop reading draft"
+                                            >
+                                                <StopCircleIcon className="w-4 h-4" />
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => handleCopy(drafts[tone])}
                                             className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-1 px-2 rounded-md transition-all text-xs"

@@ -3,7 +3,6 @@ import UserIcon from './icons/UserIcon';
 import MailIcon from './icons/MailIcon';
 import SpinnerIcon from './icons/SpinnerIcon';
 import AlertTriangleIcon from './icons/AlertTriangleIcon';
-import CheckCheckIcon from './icons/CheckCheckIcon';
 
 const WEBHOOK_URL = "https://hook.us1.make.com/4l8lzx2hcxhby7v1qlh1grhna8oymlnd";
 
@@ -18,6 +17,25 @@ interface FormErrors {
     email?: string;
     message?: string;
 }
+
+const AnimatedSuccessIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="64"
+        height="64"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        <path className="checkmark__circle" d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline className="checkmark__check" points="22 4 12 14.01 9 11.01" />
+    </svg>
+);
+
 
 const Contact: React.FC = () => {
     const [formData, setFormData] = useState<FormData>({ name: '', email: '', message: '' });
@@ -89,8 +107,8 @@ const Contact: React.FC = () => {
 
                 <div className="max-w-xl mx-auto animate-fade-in-up delay-200">
                     {formState === 'success' ? (
-                        <div className="bg-green-500/10 border border-green-500/30 text-green-300 text-center rounded-lg p-8">
-                           <CheckCheckIcon />
+                        <div role="status" className="bg-green-500/10 border border-green-500/30 text-green-300 text-center rounded-lg p-8 animate-scale-in">
+                           <AnimatedSuccessIcon className="text-green-400 mx-auto animate-success-icon" />
                             <h3 className="text-2xl font-bold mt-4">Message Sent!</h3>
                             <p className="mt-2">Thank you for reaching out. We'll get back to you if a response is needed.</p>
                         </div>
@@ -110,12 +128,17 @@ const Contact: React.FC = () => {
                                         onChange={handleChange}
                                         placeholder="Your Name"
                                         required
-                                        className={`w-full bg-slate-800 border ${errors.name ? 'border-red-500' : 'border-slate-700'} rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-amber-400`}
+                                        className={`w-full bg-slate-800 border ${errors.name ? 'border-red-500 text-red-400' : 'border-slate-700'} rounded-lg py-3 pl-10 pr-10 focus:outline-none focus:ring-2 ${errors.name ? 'focus:ring-red-500' : 'focus:ring-amber-400'}`}
                                         aria-invalid={!!errors.name}
                                         aria-describedby={errors.name ? "name-error" : undefined}
                                     />
+                                    {errors.name && (
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                            <AlertTriangleIcon className="h-5 w-5 text-red-500" />
+                                        </div>
+                                    )}
                                 </div>
-                                {errors.name && <p id="name-error" className="text-red-400 text-sm mt-1">{errors.name}</p>}
+                                {errors.name && <p id="name-error" className="text-red-400 text-sm mt-1" role="alert">{errors.name}</p>}
                             </div>
 
                             <div>
@@ -132,29 +155,41 @@ const Contact: React.FC = () => {
                                         onChange={handleChange}
                                         placeholder="Your Email"
                                         required
-                                        className={`w-full bg-slate-800 border ${errors.email ? 'border-red-500' : 'border-slate-700'} rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-amber-400`}
+                                        className={`w-full bg-slate-800 border ${errors.email ? 'border-red-500 text-red-400' : 'border-slate-700'} rounded-lg py-3 pl-10 pr-10 focus:outline-none focus:ring-2 ${errors.email ? 'focus:ring-red-500' : 'focus:ring-amber-400'}`}
                                         aria-invalid={!!errors.email}
                                         aria-describedby={errors.email ? "email-error" : undefined}
                                     />
+                                     {errors.email && (
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                            <AlertTriangleIcon className="h-5 w-5 text-red-500" />
+                                        </div>
+                                    )}
                                 </div>
-                                {errors.email && <p id="email-error" className="text-red-400 text-sm mt-1">{errors.email}</p>}
+                                {errors.email && <p id="email-error" className="text-red-400 text-sm mt-1" role="alert">{errors.email}</p>}
                             </div>
 
                             <div>
                                 <label htmlFor="message" className="sr-only">Your Message</label>
-                                <textarea
-                                    id="message"
-                                    name="message"
-                                    rows={5}
-                                    value={formData.message}
-                                    onChange={handleChange}
-                                    placeholder="Your Message"
-                                    required
-                                    className={`w-full bg-slate-800 border ${errors.message ? 'border-red-500' : 'border-slate-700'} rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-amber-400`}
-                                    aria-invalid={!!errors.message}
-                                    aria-describedby={errors.message ? "message-error" : undefined}
-                                ></textarea>
-                                {errors.message && <p id="message-error" className="text-red-400 text-sm mt-1">{errors.message}</p>}
+                                <div className="relative">
+                                    <textarea
+                                        id="message"
+                                        name="message"
+                                        rows={5}
+                                        value={formData.message}
+                                        onChange={handleChange}
+                                        placeholder="Your Message"
+                                        required
+                                        className={`w-full bg-slate-800 border ${errors.message ? 'border-red-500 text-red-400' : 'border-slate-700'} rounded-lg py-3 px-4 pr-10 focus:outline-none focus:ring-2 ${errors.message ? 'focus:ring-red-500' : 'focus:ring-amber-400'}`}
+                                        aria-invalid={!!errors.message}
+                                        aria-describedby={errors.message ? "message-error" : undefined}
+                                    ></textarea>
+                                    {errors.message && (
+                                        <div className="pointer-events-none absolute top-3 right-0 flex items-center pr-3">
+                                            <AlertTriangleIcon className="h-5 w-5 text-red-500" />
+                                        </div>
+                                    )}
+                                </div>
+                                {errors.message && <p id="message-error" className="text-red-400 text-sm mt-1" role="alert">{errors.message}</p>}
                             </div>
                             
                             {formState === 'error' && (

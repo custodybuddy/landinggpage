@@ -8,7 +8,8 @@ const Hero: React.FC = () => {
         <section className="flex items-center justify-center py-32 text-center relative overflow-hidden pt-40">
             <div className="container mx-auto px-4 z-10">
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-4 animate-fade-in-down">
-                    <span className="text-amber-400">Your Ally</span> in Co-Parenting with a <span className="text-amber-400">Toxic Ex</span>.
+                    <span className="text-amber-400">Your Ally</span> in Co-Parenting <br className="hidden sm:inline" />
+                    with a <span className="text-amber-400">Toxic Ex</span>.
                 </h1>
                 <p className="text-lg sm:text-xl md:text-2xl font-light max-w-3xl mx-auto mb-6 text-gray-300 animate-fade-in delay-200">
                     AI-Powered Legal Toolkit for Self-Represented Parents. <br className="hidden sm:inline" />
