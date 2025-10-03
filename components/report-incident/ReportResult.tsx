@@ -141,7 +141,7 @@ const ReportResult: React.FC<ReportResultProps> = ({ response, originalData, onS
                         onClick={handleExportPdf}
                         disabled={isExportingPdf}
                         className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition-all disabled:opacity-70 disabled:cursor-wait"
-                        aria-label="Export report as a PDF file"
+                        aria-label={isExportingPdf ? "Creating PDF, please wait" : "Export report as a PDF file"}
                     >
                         {isExportingPdf ? (
                             <>

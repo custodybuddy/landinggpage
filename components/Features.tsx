@@ -34,9 +34,16 @@ const Features: React.FC = () => {
         }
     };
     
+    const getAriaExpanded = (featureId: string) => {
+        if (featureId === 'case-analysis') return isCaseAnalysisModalOpen;
+        if (featureId === 'email-buddy') return isEmailBuddyModalOpen;
+        if (featureId === 'report-incident') return isReportIncidentModalOpen;
+        return false;
+    };
+    
     return (
         <>
-            <section id="features" className="bg-slate-950 py-20 md:py-32">
+            <section id="features" className="bg-slate-950 py-12 md:py-20">
                 <div className="container mx-auto px-4 text-center">
                     <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-16 animate-fade-in-up">
                         <span className="text-amber-400">AI Tools</span> to<span className="text-amber-400"> Level</span> the<span className="text-amber-400"> <i>Playing Field</i></span>.
@@ -55,6 +62,8 @@ const Features: React.FC = () => {
                                     <button
                                         onClick={() => handleButtonClick(feature.id)}
                                         className="inline-block bg-amber-400 text-black font-semibold py-2 px-6 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 motion-safe:active:scale-95 mt-auto focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-800"
+                                        aria-haspopup="dialog"
+                                        aria-expanded={getAriaExpanded(feature.id)}
                                     >
                                         {feature.buttonText}
                                     </button>

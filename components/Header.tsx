@@ -1,24 +1,15 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { routes, externalLinks } from '../routes';
 import MenuIcon from './icons/MenuIcon';
 import BookOpenIcon from './icons/BookOpenIcon';
 
-interface NavLink {
-    href: string;
-    text: string;
-    onClick?: () => void;
-    external?: boolean;
-}
-
 interface HeaderProps {
-    onOpenTemplateLibrary: () => void;
+    currentPath: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ onOpenTemplateLibrary }) => {
+const Header: React.FC<HeaderProps> = ({ currentPath }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
-    const [isAnimatingTemplateButton, setIsAnimatingTemplateButton] = useState(false);
-    const animationTimeoutRef = useRef<number | null>(null);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -28,47 +19,38 @@ const Header: React.FC<HeaderProps> = ({ onOpenTemplateLibrary }) => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Clear timeout on unmount to prevent memory leaks
-    useEffect(() => {
-        return () => {
-            if (animationTimeoutRef.current) {
-                clearTimeout(animationTimeoutRef.current);
-            }
-        };
-    }, []);
-
     const navClass = isScrolled
         ? 'fixed top-0 left-0 w-full z-50 bg-slate-900/80 backdrop-blur-sm shadow-md transition-all duration-300'
         : 'fixed top-0 left-0 w-full z-50 bg-transparent transition-all duration-300';
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-    const navLinks: NavLink[] = [
-        { href: '#features', text: 'Features' },
-        { href: '#', text: 'Template Library', onClick: onOpenTemplateLibrary },
-        { href: '#social-proof', text: 'Testimonials' },
-        { href: '#donation', text: 'Donate' },
-        { href: 'https://blog.custodybuddy.com', text: 'Blog', external: true },
-        { href: '#contact', text: 'Contact' },
-    ];
-    
-    const handleNavLinkClick = (e: React.MouseEvent, link: NavLink) => {
-        if (link.onClick) {
-            e.preventDefault();
+    const navLinks = routes.filter(r => r.inHeader);
+    const externalNavLinks = externalLinks.filter(l => l.inHeader);
 
-            // Specifically trigger animation for the Template Library button
-            if (link.text === 'Template Library') {
-                setIsAnimatingTemplateButton(true);
-                if (animationTimeoutRef.current) {
-                    clearTimeout(animationTimeoutRef.current);
-                }
-                animationTimeoutRef.current = window.setTimeout(() => {
-                    setIsAnimatingTemplateButton(false);
-                }, 400); // Duration should match the animation in CSS
-            }
-            
-            link.onClick();
-        }
+    const renderLink = (link: { href: string; text: string; external?: boolean }, isMobile: boolean = false) => {
+        const isActive = !link.external && link.href === currentPath;
+
+        const commonClasses = 'transition-colors duration-200 ease-out flex items-center';
+        const desktopClasses = `gap-1.5 text-sm font-semibold ${isActive ? 'text-amber-400' : 'hover:text-amber-400'}`;
+        const mobileClasses = `justify-center gap-2 text-xl ${isActive ? 'text-amber-400 font-bold' : 'hover:text-amber-400'}`;
+
+        const classes = isMobile ? `${commonClasses} ${mobileClasses}` : `${commonClasses} ${desktopClasses}`;
+
+        return (
+            <a 
+                key={link.text} 
+                href={link.href} 
+                className={classes}
+                target={link.external ? '_blank' : '_self'} 
+                rel={link.external ? 'noopener noreferrer' : ''}
+                onClick={isMobile ? toggleMenu : undefined}
+                aria-current={isActive ? 'page' : undefined}
+            >
+                {link.text === 'Template Library' && <BookOpenIcon className={isMobile ? "w-5 h-5" : "w-4 h-4"} />}
+                {link.text}
+            </a>
+        );
     };
 
     return (
@@ -77,38 +59,25 @@ const Header: React.FC<HeaderProps> = ({ onOpenTemplateLibrary }) => {
                 <div className="container mx-auto px-4">
                     {/* Desktop Layout */}
                     <div className="hidden md:flex flex-col items-center py-3">
-                        {/* Logo */}
-                        <a href="/" className="text-xl md:text-2xl font-black transition-transform transform hover:scale-105 mb-3">
+                        <a href="#/" className="text-xl md:text-2xl font-black transition-transform transform hover:scale-105 mb-3">
                             <span className="text-amber-400">CUSTODY</span>
                             <span>BUDDY</span>
                             <span className="text-amber-400">.COM</span>
                         </a>
-                        {/* Nav Bar */}
                         <div className="flex items-center gap-6">
-                            {navLinks.map((link) => (
-                                <a 
-                                    key={link.text} 
-                                    href={link.href} 
-                                    className={`hover:text-amber-400 transition-colors duration-200 ease-out flex items-center gap-1.5 text-sm font-semibold ${link.text === 'Template Library' && isAnimatingTemplateButton ? 'animate-subtle-bounce' : ''}`} 
-                                    target={link.external ? '_blank' : '_self'} 
-                                    rel={link.external ? 'noopener noreferrer' : ''}
-                                    onClick={(e) => handleNavLinkClick(e, link)}
-                                >
-                                    {link.text === 'Template Library' && <BookOpenIcon className="w-4 h-4" />}
-                                    {link.text}
-                                </a>
-                            ))}
+                            {navLinks.map(link => renderLink({ href: link.path, text: link.label }))}
+                            {externalNavLinks.map(link => renderLink({ ...link, external: true }))}
                         </div>
                     </div>
 
                     {/* Mobile Layout */}
                     <div className="md:hidden flex items-center justify-center relative py-4">
-                        <a href="/" className="text-xl font-black transition-transform transform hover:scale-105">
+                        <a href="#/" className="text-xl font-black transition-transform transform hover:scale-105">
                             <span className="text-amber-400">CUSTODY</span>
                             <span>BUDDY</span>
                             <span className="text-amber-400">.COM</span>
                         </a>
-                        <button id="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded={isMenuOpen} className="absolute right-0 top-1/2 -translate-y-1/2 text-white hover:text-amber-400 transition-colors duration-200 ease-out" onClick={toggleMenu}>
+                        <button id="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded={isMenuOpen} aria-controls="mobile-menu" className="absolute right-0 top-1/2 -translate-y-1/2 text-white hover:text-amber-400 transition-colors duration-200 ease-out" onClick={toggleMenu}>
                             <MenuIcon />
                         </button>
                     </div>
@@ -116,26 +85,12 @@ const Header: React.FC<HeaderProps> = ({ onOpenTemplateLibrary }) => {
             </nav>
 
             {/* Mobile Menu */}
-            <div id="mobile-menu" className={`fixed top-0 left-0 w-full h-full bg-slate-900 z-40 md:hidden transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                <div className="p-6 flex flex-col items-center space-y-6 text-xl text-center pt-24">
-                    <a href="/" className="font-bold text-amber-400" onClick={toggleMenu}>Home</a>
-                    {navLinks.map((link) => (
-                         <a 
-                            key={link.text} 
-                            href={link.href} 
-                            className="hover:text-amber-400 transition-colors duration-200 ease-out flex items-center justify-center gap-2" 
-                            target={link.external ? '_blank' : '_self'} 
-                            rel={link.external ? 'noopener noreferrer' : ''}
-                            onClick={(e) => {
-                                handleNavLinkClick(e, link);
-                                toggleMenu();
-                            }}
-                        >
-                            {link.text === 'Template Library' && <BookOpenIcon className="w-5 h-5" />}
-                            {link.text}
-                        </a>
-                    ))}
-                    <a href="#features" className="inline-block bg-amber-400 text-black font-semibold py-3 px-8 rounded-full shadow-lg mt-4" onClick={toggleMenu}>
+            <div id="mobile-menu" role="dialog" aria-modal="true" aria-labelledby="mobile-menu-title" className={`fixed top-0 left-0 w-full h-full bg-slate-900 z-40 md:hidden transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <h2 id="mobile-menu-title" className="sr-only">Main Menu</h2>
+                <div className="p-6 flex flex-col items-center space-y-6 text-center pt-24">
+                    {navLinks.map(link => renderLink({ href: link.path, text: link.label }, true))}
+                    {externalNavLinks.map(link => renderLink({ ...link, external: true }, true))}
+                    <a href="#/features" className="inline-block bg-amber-400 text-black font-semibold py-3 px-8 rounded-full shadow-lg mt-4" onClick={toggleMenu}>
                         Start Now
                     </a>
                 </div>

@@ -69,15 +69,15 @@ const TemplateLibrary: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
                 {selectedTemplate ? (
                     <div className="flex-grow flex flex-col animate-fade-in">
                         <div className="mb-4">
-                            <h3 className="text-xl font-bold text-gray-100">{selectedTemplate.title}</h3>
-                            <p className="text-sm text-gray-400 mt-1">{selectedTemplate.description}</p>
+                            <h3 id="template-title" className="text-xl font-bold text-gray-100">{selectedTemplate.title}</h3>
+                            <p id="template-description" className="text-sm text-gray-400 mt-1">{selectedTemplate.description}</p>
                         </div>
                         <div className="flex-grow relative">
                             <textarea
                                 value={editedContent}
                                 onChange={(e) => setEditedContent(e.target.value)}
                                 className="w-full h-full p-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-amber-400 focus:outline-none transition-shadow duration-200 resize-none"
-                                aria-label="Editable template content"
+                                aria-labelledby="template-title template-description"
                             />
                         </div>
                         <div className="mt-4 text-right">

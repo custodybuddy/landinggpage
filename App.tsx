@@ -1,70 +1,43 @@
-import React, { useState, useMemo, lazy, Suspense, useCallback } from 'react';
+import React, { useState, lazy, Suspense, useCallback, useEffect } from 'react';
 import Header from './components/Header';
-import Hero from './components/Hero';
-import Features from './components/Features';
-import Testimonials from './components/Testimonials';
-import Resources from './components/Resources';
-import Donation from './components/Donation';
-import CTA from './components/CTA';
-import Contact from './components/Contact';
 import Footer from './components/Footer';
-import Modal from './components/Modal';
 import LiveChatWidget from './components/LiveChatWidget';
-import SpinnerIcon from './components/icons/SpinnerIcon';
+import { routes } from './routes';
 
-// Lazy-load modal components
 const LiveChatModal = lazy(() => import('./components/LiveChatModal'));
-const TemplateLibrary = lazy(() => import('./components/TemplateLibrary'));
-const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
-const TermsOfUse = lazy(() => import('./components/TermsOfUse'));
-
-const SuspenseFallback: React.FC = () => (
-    <div className="flex justify-center items-center h-full min-h-[400px]">
-      <div className="text-center text-gray-400">
-        <SpinnerIcon className="w-8 h-8 mx-auto mb-2 text-amber-400" />
-        <p>Loading...</p>
-      </div>
-    </div>
-);
-
 
 const App: React.FC = () => {
-    const [isTemplateLibraryModalOpen, setIsTemplateLibraryModalOpen] = useState(false);
-    const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
-    const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+    const [route, setRoute] = useState(window.location.hash || '#/');
     const [isLiveChatModalOpen, setIsLiveChatModalOpen] = useState(false);
 
-    const isAnyModalOpen = useMemo(() => 
-        isTemplateLibraryModalOpen || isPrivacyModalOpen || isTermsModalOpen || isLiveChatModalOpen,
-        [isTemplateLibraryModalOpen, isPrivacyModalOpen, isTermsModalOpen, isLiveChatModalOpen]
-    );
+    useEffect(() => {
+        const handleHashChange = () => {
+            setRoute(window.location.hash || '#/');
+            window.scrollTo(0, 0); // Scroll to top on page change
+        };
 
-    const handleOpenTemplateLibrary = useCallback(() => setIsTemplateLibraryModalOpen(true), []);
-    const handleOpenPrivacyPolicy = useCallback(() => setIsPrivacyModalOpen(true), []);
-    const handleOpenTermsOfUse = useCallback(() => setIsTermsModalOpen(true), []);
+        // Set initial route
+        handleHashChange();
+
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+    
     const handleOpenLiveChat = useCallback(() => setIsLiveChatModalOpen(true), []);
-    const handleCloseTemplateLibrary = useCallback(() => setIsTemplateLibraryModalOpen(false), []);
-    const handleClosePrivacyPolicy = useCallback(() => setIsPrivacyModalOpen(false), []);
-    const handleCloseTermsOfUse = useCallback(() => setIsTermsModalOpen(false), []);
     const handleCloseLiveChat = useCallback(() => setIsLiveChatModalOpen(false), []);
+
+    const isAnyModalOpen = isLiveChatModalOpen;
+
+    const currentRoute = routes.find(r => r.path === route) || routes.find(r => r.path === '#/');
+    const PageComponent = currentRoute!.component;
 
     return (
         <div className="bg-slate-900 text-white">
-            <Header onOpenTemplateLibrary={handleOpenTemplateLibrary} />
+            <Header currentPath={route} />
             <main aria-hidden={isAnyModalOpen}>
-                <Hero />
-                <Features />
-                <Testimonials />
-                <Resources />
-                <Donation />
-                <CTA />
-                <Contact />
+                <PageComponent />
             </main>
-            <Footer 
-                onOpenPrivacyPolicy={handleOpenPrivacyPolicy}
-                onOpenTermsOfUse={handleOpenTermsOfUse}
-                aria-hidden={isAnyModalOpen}
-            />
+            <Footer currentPath={route} aria-hidden={isAnyModalOpen} />
 
             <LiveChatWidget onOpen={handleOpenLiveChat} />
 
@@ -76,36 +49,6 @@ const App: React.FC = () => {
                     />
                 )}
             </Suspense>
-
-            <Modal
-                isOpen={isTemplateLibraryModalOpen}
-                onClose={handleCloseTemplateLibrary}
-                title="Email Template Library"
-            >
-                <Suspense fallback={<SuspenseFallback />}>
-                    <TemplateLibrary isOpen={isTemplateLibraryModalOpen} />
-                </Suspense>
-            </Modal>
-
-            <Modal
-                isOpen={isPrivacyModalOpen}
-                onClose={handleClosePrivacyPolicy}
-                title="Privacy Policy"
-            >
-                <Suspense fallback={<SuspenseFallback />}>
-                    <PrivacyPolicy />
-                </Suspense>
-            </Modal>
-
-            <Modal
-                isOpen={isTermsModalOpen}
-                onClose={handleCloseTermsOfUse}
-                title="Terms of Use"
-            >
-                <Suspense fallback={<SuspenseFallback />}>
-                    <TermsOfUse />
-                </Suspense>
-            </Modal>
         </div>
     );
 };

@@ -134,11 +134,11 @@ const FileManagement: React.FC<FileManagementProps> = ({ files, onFilesChange, i
                     accept=".jpeg,.jpg,.png,.webp,.pdf"
                     onChange={handleFileChange}
                     disabled={isLoading}
-                    aria-label="Upload documents for analysis"
+                    aria-labelledby="dropzone-label"
                 />
                 <div className="flex flex-col items-center justify-center pointer-events-none">
                     {justDropped ? <CheckCircleIcon /> : <UploadCloudIcon />}
-                    <p className={`mt-2 font-semibold transition-colors duration-200 ${justDropped ? 'text-green-400' : 'text-white'}`}>
+                    <p id="dropzone-label" className={`mt-2 font-semibold transition-colors duration-200 ${justDropped ? 'text-green-400' : 'text-white'}`}>
                         {justDropped ? 'Files Accepted!' : isDragging ? 'Drop your files here' : 'Click or drag & drop documents'}
                     </p>
                     <p className="text-xs text-gray-400">PDF, JPG, PNG, WEBP (Max 10MB each)</p>

@@ -23,22 +23,6 @@ export const features = [
         link: '#',
     },
     {
-        id: 'parental-rights',
-        icon: <ShieldHalfIcon />,
-        title: <>Parental Rights Canada: Know <span className="text-amber-400">Your Power</span>.</>,
-        description: 'Stop manipulation with knowledge of province-specific rights, schedule simulations, and what-if scenarios.',
-        buttonText: 'CLAIM YOUR RIGHTS',
-        link: 'https://chatgpt.com/g/g-67f3e3186d388191b7a729f3db19fb7e-parental-rights-canada-custodybuddy-com',
-    },
-    {
-        id: 'fathers-rights',
-        icon: <ScaleIcon />,
-        title: <>Fathers' Rights Canada: <span className="text-amber-400">Fight Back</span> Against Bias.</>,
-        description: 'Get a strategic advantage with tailored strategies, guided legal forms, and legal aid connections for Canadian fathers.',
-        buttonText: 'LEVEL THE FIELD',
-        link: '#contact',
-    },
-    {
         id: 'email-buddy',
         icon: <MailPlusIcon />,
         title: <>Email Law Buddy: <span className="text-amber-400">Shut Down</span> the Games.</>,

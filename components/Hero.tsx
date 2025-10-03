@@ -5,7 +5,7 @@ import ShieldCheckIcon from './icons/ShieldCheckIcon';
 
 const Hero: React.FC = () => {
     return (
-        <section className="flex items-center justify-center py-32 text-center relative overflow-hidden pt-40">
+        <section className="flex items-center justify-center pt-40 pb-16 text-center relative overflow-hidden">
             <div className="container mx-auto px-4 z-10">
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-4 animate-fade-in-down">
                     <span className="text-amber-400">Your Ally</span> in Co-Parenting <br className="hidden sm:inline" />
