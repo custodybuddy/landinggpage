@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Persona } from '../../prompts';
 import LightbulbIcon from '../icons/LightbulbIcon';
@@ -30,7 +31,12 @@ const PersonaMenu: React.FC<PersonaMenuProps> = ({ isOpen, selectedPersona, onSe
     if (!isOpen) return null;
 
     return (
-        <div className="absolute top-full right-0 mt-2 w-64 bg-slate-700 rounded-lg shadow-2xl z-10 border border-slate-600 animate-fade-in-up-fast">
+        <div 
+            role="menu"
+            aria-orientation="vertical"
+            aria-labelledby="persona-menu-button"
+            className="absolute top-full right-0 mt-2 w-64 bg-slate-700 rounded-lg shadow-2xl z-10 border border-slate-600 animate-fade-in-up-fast"
+        >
             <div className="p-3 border-b border-slate-600">
                 <p className="font-semibold text-white text-sm">Select Persona</p>
             </div>
@@ -38,10 +44,13 @@ const PersonaMenu: React.FC<PersonaMenuProps> = ({ isOpen, selectedPersona, onSe
                 {Object.keys(personaDetails).map((p) => {
                     const persona = p as Persona;
                     const details = personaDetails[persona];
+                    const isSelected = selectedPersona === persona;
                     return (
                         <button
                             key={persona}
                             onClick={() => onSelectPersona(persona)}
+                            role="menuitemradio"
+                            aria-checked={isSelected}
                             className="w-full text-left px-3 py-2 text-sm flex items-center gap-3 hover:bg-slate-600 transition-colors group"
                         >
                             <span className="text-amber-400">{details.icon}</span>
@@ -49,7 +58,7 @@ const PersonaMenu: React.FC<PersonaMenuProps> = ({ isOpen, selectedPersona, onSe
                                 <p className="text-white font-medium">{persona}</p>
                                 <p className="text-gray-400 text-xs">{details.description}</p>
                             </div>
-                            {selectedPersona === persona && <CheckCheckIcon />}
+                            {isSelected && <CheckCheckIcon />}
                         </button>
                     );
                 })}

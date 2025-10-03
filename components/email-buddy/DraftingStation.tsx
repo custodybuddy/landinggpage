@@ -13,6 +13,7 @@ import { getFriendlyErrorMessage } from '../../utils/errorUtils';
 import { generateDraftEmail } from '../../services/aiService';
 import { useTextToSpeech } from '../../hooks/useTextToSpeech';
 import { ToneOption } from '../EmailLawBuddy';
+import Feedback from '../Feedback';
 
 interface DraftingStationProps {
     receivedEmail: string;
@@ -168,7 +169,7 @@ ${keyPoints}
                                 )}
                             </button>
                              {drafts[tone] && (
-                                <div className="p-4 bg-slate-900 border border-t-0 border-slate-700 rounded-b-lg animate-fade-in-up relative">
+                                <div className="p-4 bg-slate-900 border border-t-0 border-slate-700 rounded-b-lg animate-fade-in-up relative flex flex-col h-full">
                                     {isShowingExample && (
                                         <div className="mb-4 p-3 bg-slate-800 border border-amber-500/30 rounded-lg text-xs text-gray-300">
                                             <h5 className="font-bold text-amber-400 mb-1">Why this works ({tone}):</h5>
@@ -203,9 +204,12 @@ ${keyPoints}
                                         </button>
                                     </div>
                                     <div 
-                                        className="text-gray-300 leading-relaxed prose prose-invert prose-p:my-2 prose-strong:text-amber-400 max-w-none text-sm pt-8"
+                                        className="text-gray-300 leading-relaxed prose prose-invert prose-p:my-2 prose-strong:text-amber-400 max-w-none text-sm pt-8 flex-grow"
                                         dangerouslySetInnerHTML={{ __html: formatMarkdown(drafts[tone]) }}
                                     />
+                                    <div className="mt-auto pt-4">
+                                        <Feedback />
+                                    </div>
                                 </div>
                             )}
                         </div>

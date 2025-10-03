@@ -4,6 +4,7 @@ import SpeakerIcon from '../icons/SpeakerIcon';
 import StopCircleIcon from '../icons/StopCircleIcon';
 import { formatMarkdown } from '../../utils/markdownParser';
 import { useTextToSpeech } from '../../hooks/useTextToSpeech';
+import Feedback from '../Feedback';
 
 interface AnalysisResultProps {
     response: string;
@@ -78,6 +79,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ response }) => {
                 className="text-gray-300 leading-relaxed prose prose-invert prose-p:my-2 prose-ul:my-2 prose-strong:text-amber-400 max-w-none"
                 dangerouslySetInnerHTML={{ __html: formatMarkdown(response) }}
             />
+            <Feedback />
         </div>
     );
 };

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { books, legalAidServices } from '../constants';
 import ExternalLinkIcon from './icons/ExternalLinkIcon';
@@ -31,6 +32,7 @@ const Resources: React.FC = () => {
                                    aria-label={book.ariaLabel}>
                                     <ExternalLinkIcon />
                                     View on Amazon
+                                    <span className="sr-only">(opens in new tab)</span>
                                 </a>
                                 <span className="text-xs text-gray-400">(paid link)</span>
                             </div>
@@ -61,6 +63,7 @@ const Resources: React.FC = () => {
                                 </span>
                                 <div className="text-amber-400 group-hover:text-white transition-colors">
                                     <ExternalLinkIcon />
+                                    <span className="sr-only">(opens in new tab)</span>
                                 </div>
                             </a>
                         ))}

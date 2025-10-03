@@ -1,7 +1,10 @@
+
 import React from 'react';
 import { IncidentReport, IncidentData } from '../../hooks/useIncidentReporter';
 import DownloadIcon from '../icons/DownloadIcon';
 import RotateCwIcon from '../icons/RotateCwIcon';
+import Feedback from '../Feedback';
+import ExternalLinkIcon from '../icons/ExternalLinkIcon';
 
 interface ReportResultProps {
     response: IncidentReport;
@@ -30,10 +33,12 @@ const ReportResult: React.FC<ReportResultProps> = ({ response, originalData, onS
         });
         text += `\n`;
         text += `----------------------------------------\n`;
-        text += `LEGAL INSIGHTS (FOR INFORMATIONAL PURPOSES)\n`;
+        text += `LEGAL INSIGHTS & STRATEGY (FOR INFORMATIONAL PURPOSES)\n`;
         text += `----------------------------------------\n`;
         response.legalInsights.forEach(item => {
-            text += `- ${item}\n`;
+            text += `- Insight: ${item.insight}\n`;
+            text += `  Legislation: ${item.legislation}\n`;
+            text += `  Source: ${item.sourceUrl}\n\n`;
         });
         text += `\n\n========================================\n`;
         text += `Original Narrative (for reference):\n${originalData.narrative}\n\n`;
@@ -89,12 +94,30 @@ const ReportResult: React.FC<ReportResultProps> = ({ response, originalData, onS
                     </ul>
                 </section>
                 <section>
-                    <h4 className="font-bold text-lg text-gray-200 mb-2">Legal Insights</h4>
-                    <ul className="list-disc pl-5 space-y-1 text-gray-300">
-                        {response.legalInsights.map((item, i) => <li key={i}>{item}</li>)}
-                    </ul>
-                     <p className="text-xs text-gray-500 mt-3">*For informational purposes only. Not legal advice.</p>
+                    <h4 className="font-bold text-lg text-gray-200 mb-2">Legal Insights &amp; Strategy</h4>
+                     <div className="space-y-4">
+                        {response.legalInsights.map((item, i) => (
+                            <div key={i} className="p-3 bg-slate-800 rounded-md border border-slate-700">
+                                <p className="text-gray-300">{item.insight}</p>
+                                <div className="mt-2 text-xs">
+                                    <span className="font-semibold text-gray-400">Relevant Legislation: </span>
+                                    <a 
+                                        href={item.sourceUrl} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-amber-400 hover:text-amber-300 hover:underline inline-flex items-center gap-1"
+                                    >
+                                        {item.legislation}
+                                        <ExternalLinkIcon />
+                                        <span className="sr-only">(opens in new tab)</span>
+                                    </a>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                     <p className="text-xs text-gray-500 mt-3">*For informational purposes only. Not legal advice. Verify sources independently.</p>
                 </section>
+                <Feedback />
             </div>
         </div>
     );

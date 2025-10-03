@@ -1,16 +1,29 @@
+
 import React from 'react';
 
-const Footer: React.FC = () => {
+interface FooterProps {
+    onOpenPrivacyPolicy: () => void;
+    onOpenTermsOfUse: () => void;
+    "aria-hidden"?: boolean;
+}
+
+const Footer: React.FC<FooterProps> = ({ onOpenPrivacyPolicy, onOpenTermsOfUse, "aria-hidden": ariaHidden }) => {
+    
+    const handleLinkClick = (e: React.MouseEvent, handler: () => void) => {
+        e.preventDefault();
+        handler();
+    };
+
     return (
-        <footer id="contact" className="bg-slate-900 py-8 text-center text-gray-400 border-t border-slate-800">
+        <footer id="contact" className="bg-slate-900 py-8 text-center text-gray-400 border-t border-slate-800" aria-hidden={ariaHidden}>
             <div className="container mx-auto px-4">
                 <nav className="space-x-4 mb-4">
                     <a href="#features" className="hover:text-amber-400 transition-colors duration-200 ease-out">Features</a>
                     <a href="#social-proof" className="hover:text-amber-400 transition-colors duration-200 ease-out">Testimonials</a>
                     <a href="#donation" className="hover:text-amber-400 transition-colors duration-200 ease-out">Donate</a>
                     <a href="https://blog.custodybuddy.com" className="hover:text-amber-400 transition-colors duration-200 ease-out" target="_blank" rel="noopener noreferrer">Blog</a>
-                    <a href="#" className="hover:text-amber-400 transition-colors duration-200 ease-out">Privacy Policy</a>
-                    <a href="#" className="hover:text-amber-400 transition-colors duration-200 ease-out">Terms of Use</a>
+                    <a href="#" onClick={(e) => handleLinkClick(e, onOpenPrivacyPolicy)} className="hover:text-amber-400 transition-colors duration-200 ease-out">Privacy Policy</a>
+                    <a href="#" onClick={(e) => handleLinkClick(e, onOpenTermsOfUse)} className="hover:text-amber-400 transition-colors duration-200 ease-out">Terms of Use</a>
                     <a href="#contact" className="hover:text-amber-400 transition-colors duration-200 ease-out">Contact</a>
                 </nav>
 

@@ -1,3 +1,4 @@
+
 // Fix: Refactor the entire AI service to use the @google/genai SDK instead of OpenAI.
 import { GoogleGenAI, Type } from "@google/genai";
 import { fileToDataUrl, pdfToText } from '../utils/fileUtils';
@@ -145,6 +146,7 @@ ${incidentData.narrative}
         contents: userPrompt,
         config: {
             systemInstruction: systemPrompt,
+            tools: [{googleSearch: {}}],
             responseMimeType: "application/json",
             responseSchema: {
                 type: Type.OBJECT,
@@ -160,8 +162,25 @@ ${incidentData.narrative}
                     },
                     legalInsights: {
                         type: Type.ARRAY,
-                        description: "A list of potential legal concepts or violations relevant to the incident, specific to the provided jurisdiction.",
-                        items: { type: Type.STRING }
+                        description: "A list of potential legal arguments or strategies based on web-searched legislation for the given jurisdiction.",
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                insight: { 
+                                    type: Type.STRING, 
+                                    description: "The strategic insight or potential legal argument." 
+                                },
+                                legislation: { 
+                                    type: Type.STRING, 
+                                    description: "The name of the relevant act, statute, or legal principle found via web search." 
+                                },
+                                sourceUrl: { 
+                                    type: Type.STRING, 
+                                    description: "A direct URL to the legal source or an authoritative explanation." 
+                                }
+                            },
+                            required: ['insight', 'legislation', 'sourceUrl']
+                        }
                     }
                 },
                 required: ['professionalSummary', 'observedImpact', 'legalInsights']

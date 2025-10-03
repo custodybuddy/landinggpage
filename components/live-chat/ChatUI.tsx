@@ -1,3 +1,4 @@
+
 // Implemented the `ChatUI` component to render the user interface for the live voice chat.
 import React, { useRef, useEffect } from 'react';
 import { LiveChatHook, TranscriptEntry } from '../../hooks/useLiveChat';
@@ -87,7 +88,12 @@ const ChatUI: React.FC<ChatUIProps> = ({
                 <div className="flex flex-col">
                     <h2 className="text-lg font-bold text-amber-400">AI Legal Assistant</h2>
                     <div className="relative" ref={personaMenuRef}>
-                        <button onClick={onTogglePersonaMenu} className="text-xs text-gray-400 hover:text-white transition-colors">
+                        <button 
+                            onClick={onTogglePersonaMenu} 
+                            className="text-xs text-gray-400 hover:text-white transition-colors"
+                            aria-haspopup="true"
+                            aria-expanded={isPersonaMenuOpen}
+                        >
                             Persona: {selectedPersona} ▼
                         </button>
                         <PersonaMenu

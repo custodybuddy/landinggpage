@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { generateIncidentReport } from '../services/aiService';
 import { incidentReportSystemPrompt } from '../prompts';
@@ -14,7 +15,11 @@ export interface IncidentData {
 export interface IncidentReport {
     professionalSummary: string;
     observedImpact: string[];
-    legalInsights: string[];
+    legalInsights: Array<{
+        insight: string;
+        legislation: string;
+        sourceUrl: string;
+    }>;
 }
 
 const initialIncidentData: IncidentData = {
