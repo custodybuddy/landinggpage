@@ -1,55 +1,45 @@
-import { Blob } from '@google/genai';
+// Fix: Add audio utility functions required for the new Gemini Live API implementation.
 
 /**
- * Encodes a Uint8Array into a Base64 string.
- * This is used to prepare audio data to be sent to the Gemini API.
+ * Encodes a byte array into a Base64 string.
+ * This is a manual implementation to avoid external libraries, as per guidelines.
+ * @param bytes The Uint8Array to encode.
+ * @returns The Base64 encoded string.
  */
 export function encode(bytes: Uint8Array): string {
-  let binary = '';
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary);
+    let binary = '';
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
 }
 
 /**
- * Decodes a Base64 string into a Uint8Array.
- * This is used to process the audio data received from the Gemini API.
+ * Decodes a Base64 string into a byte array.
+ * This is a manual implementation to avoid external libraries, as per guidelines.
+ * @param base64 The Base64 encoded string.
+ * @returns The decoded Uint8Array.
  */
 export function decode(base64: string): Uint8Array {
-  const binaryString = atob(base64);
-  const len = binaryString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes;
-}
-
-/**
- * Creates a Gemini API-compatible Blob from raw audio data.
- * It converts Float32Array data from the microphone into a 16-bit PCM format.
- */
-export function createBlob(data: Float32Array): Blob {
-    const l = data.length;
-    const int16 = new Int16Array(l);
-    for (let i = 0; i < l; i++) {
-        // The VAD needs the audio to be in the range of a 16-bit signed integer.
-        // We're clamping the values to avoid distortion.
-        int16[i] = Math.max(-32768, Math.min(32767, data[i] * 32768));
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
     }
-    return {
-        data: encode(new Uint8Array(int16.buffer)),
-        // The required audio MIME type is 'audio/pcm' with a 16000 sample rate.
-        mimeType: 'audio/pcm;rate=16000',
-    };
+    return bytes;
 }
-
 
 /**
  * Decodes raw PCM audio data into an AudioBuffer that can be played by the browser.
- * The browser's native `decodeAudioData` is for file formats (like MP3), not raw streams.
+ * This function is necessary because the browser's native `decodeAudioData` does not
+ * work with raw PCM streams from the Gemini Live API.
+ * @param data The raw audio data as a Uint8Array.
+ * @param ctx The AudioContext to use for creating the buffer.
+ * @param sampleRate The sample rate of the audio (e.g., 24000).
+ * @param numChannels The number of audio channels (e.g., 1 for mono).
+ * @returns A Promise that resolves to an AudioBuffer.
  */
 export async function decodeAudioData(
     data: Uint8Array,
@@ -57,7 +47,6 @@ export async function decodeAudioData(
     sampleRate: number,
     numChannels: number,
 ): Promise<AudioBuffer> {
-    // The incoming data is 16-bit PCM.
     const dataInt16 = new Int16Array(data.buffer);
     const frameCount = dataInt16.length / numChannels;
     const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
@@ -65,7 +54,6 @@ export async function decodeAudioData(
     for (let channel = 0; channel < numChannels; channel++) {
         const channelData = buffer.getChannelData(channel);
         for (let i = 0; i < frameCount; i++) {
-            // Convert the 16-bit integer back to a float in the range [-1.0, 1.0].
             channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
         }
     }

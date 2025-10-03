@@ -4,7 +4,8 @@
  * Supported features:
  * - Bold (`**text**`) and Italic (`*text*` or `_text_`)
  * - Inline code (` `code` `)
- * - Unordered lists (`* item`)
+ * - Unordered lists (`*`, `+`, or `-` item)
+ * - Ordered lists (`1. item`)
  * - Fenced code blocks (```code```)
  * - Tables (`| th | th |\n|:--|:--|\n| td | td |`)
  * - Paragraphs (groups consecutive lines, separated by blank lines)
@@ -21,7 +22,9 @@ export const formatMarkdown = (text: string): string => {
 
     const lines = text.split('\n');
     let html = '';
-    let inList = false;
+    
+    // State variables
+    let listType: 'ul' | 'ol' | null = null;
     let inCodeBlock = false;
     let codeBlockContent = '';
     let paragraphBuffer: string[] = [];
@@ -32,24 +35,30 @@ export const formatMarkdown = (text: string): string => {
             paragraphBuffer = [];
         }
     };
+    
+    const closeList = () => {
+        if (listType === 'ul') html += '</ul>';
+        if (listType === 'ol') html += '</ol>';
+        listType = null;
+    };
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
 
         if (line.trim().startsWith('```')) {
             flushParagraphBuffer();
+            closeList();
             if (inCodeBlock) {
                 const escapedCode = codeBlockContent.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 html += `<pre class="bg-slate-950 p-4 rounded-md overflow-x-auto mb-4"><code class="text-white text-sm font-mono">${escapedCode.trim()}</code></pre>`;
                 inCodeBlock = false;
                 codeBlockContent = '';
             } else {
-                if (inList) { html += '</ul>'; inList = false; }
                 inCodeBlock = true;
             }
             continue;
         }
-
+        
         if (inCodeBlock) {
             codeBlockContent += line + '\n';
             continue;
@@ -57,7 +66,7 @@ export const formatMarkdown = (text: string): string => {
 
         if (line.trim() === '') {
             flushParagraphBuffer();
-            if (inList) { html += '</ul>'; inList = false; }
+            closeList();
             continue;
         }
 
@@ -66,7 +75,7 @@ export const formatMarkdown = (text: string): string => {
 
         if (isTableRow(line) && (i + 1 < lines.length) && isTableSeparator(lines[i + 1])) {
             flushParagraphBuffer();
-            if (inList) { html += '</ul>'; inList = false; }
+            closeList();
 
             html += '<div class="overflow-x-auto mb-4 rounded-lg border border-slate-700"><table class="w-full text-sm text-left text-gray-300">';
             
@@ -95,25 +104,34 @@ export const formatMarkdown = (text: string): string => {
             i = tableRowIndex - 1; 
             continue;
         }
+        
+        const ulMatch = line.match(/^\s*([*+-])\s+(.*)/);
+        const olMatch = line.match(/^\s*(\d+)\.\s+(.*)/);
 
-        if (line.trim().startsWith('* ')) {
+        if (ulMatch) {
             flushParagraphBuffer();
-            if (!inList) {
+            if (listType !== 'ul') {
+                closeList(); // Close ol if it was open
                 html += '<ul class="list-disc pl-6 space-y-2 mb-4">';
-                inList = true;
+                listType = 'ul';
             }
-            html += `<li>${processInlineFormatting(line.trim().substring(2))}</li>`;
+            html += `<li>${processInlineFormatting(ulMatch[2])}</li>`;
+        } else if (olMatch) {
+            flushParagraphBuffer();
+            if (listType !== 'ol') {
+                closeList(); // Close ul if it was open
+                html += '<ol class="list-decimal pl-6 space-y-2 mb-4">';
+                listType = 'ol';
+            }
+            html += `<li>${processInlineFormatting(olMatch[2])}</li>`;
         } else {
-            if (inList) {
-                html += '</ul>';
-                inList = false;
-            }
+            closeList();
             paragraphBuffer.push(line.trim());
         }
     }
 
     flushParagraphBuffer();
-    if (inList) { html += '</ul>'; }
+    closeList();
     if (inCodeBlock) {
         const escapedCode = codeBlockContent.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         html += `<pre class="bg-slate-950 p-4 rounded-md overflow-x-auto mb-4"><code class="text-white text-sm font-mono">${escapedCode.trim()}</code></pre>`;
