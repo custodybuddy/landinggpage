@@ -3,7 +3,7 @@ import React from 'react';
 
 const Testimonials: React.FC = () => {
     return (
-        <section id="social-proof" className="py-20 md:py-32">
+        <section id="social-proof" className="py-12 md:py-16">
             <div className="container mx-auto px-4 text-center">
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 animate-fade-in">A <span className="text-amber-400">Partner</span> Who <span className="text-amber-400">Understands.</span></h2>
                 <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12 animate-fade-in delay-100">

@@ -4,9 +4,12 @@ import Footer from './components/Footer';
 import { routes, externalLinks, NavLink } from './routes';
 import { ModalProvider } from './contexts/ModalContext';
 import GlobalModals from './components/GlobalModals';
+import { useConsent } from './hooks/useConsent';
+import ConsentModal from './components/ConsentModal';
 
 const App: React.FC = () => {
     const [route, setRoute] = useState(window.location.hash || '#/');
+    const { consentGiven, acceptConsent } = useConsent();
 
     useEffect(() => {
         const handleHashChange = () => {
@@ -52,6 +55,7 @@ const App: React.FC = () => {
                 </main>
                 <Footer currentPath={route} navLinks={footerNavLinks} />
                 <GlobalModals />
+                {!consentGiven && <ConsentModal onAccept={acceptConsent} />}
             </div>
         </ModalProvider>
     );
