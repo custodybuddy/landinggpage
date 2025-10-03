@@ -3,6 +3,7 @@ import React, { useRef, useEffect } from 'react';
 import { LiveChatHook, TranscriptEntry } from '../../hooks/useLiveChat';
 import { Persona } from '../../prompts';
 import PersonaMenu from './PersonaMenu';
+import TypingIndicator from './TypingIndicator';
 import XIcon from '../icons/XIcon';
 import MicIcon from '../icons/MicIcon';
 import MicOffIcon from '../icons/MicOffIcon';
@@ -56,9 +57,13 @@ const ChatUI: React.FC<ChatUIProps> = ({
 
     const scrollRef = useRef<HTMLDivElement>(null);
 
+    // Enhanced scroll-to-bottom behavior with smooth scrolling.
     useEffect(() => {
         if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            scrollRef.current.scrollTo({
+                top: scrollRef.current.scrollHeight,
+                behavior: 'smooth'
+            });
         }
     }, [transcriptHistory, currentInterimTranscript, currentModelTranscript]);
 
@@ -98,20 +103,23 @@ const ChatUI: React.FC<ChatUIProps> = ({
                 {transcriptHistory.map((entry, index) => (
                     <ChatMessage key={index} entry={entry} />
                 ))}
+                {/* Updated styling for interim user transcript */}
                 {currentInterimTranscript && (
                     <div className="flex gap-3 my-4 justify-end">
-                        <div className="p-3 rounded-lg max-w-sm md:max-w-md bg-amber-500/70 text-black/70 italic">
+                        <div className="p-3 rounded-lg max-w-sm md:max-w-md bg-amber-500 text-black">
                             <p className="text-sm">{currentInterimTranscript}</p>
                         </div>
                     </div>
                 )}
+                {/* Updated styling for interim model transcript with typing indicator */}
                 {currentModelTranscript && (
                     <div className="flex gap-3 my-4 justify-start">
-                         <div className="w-8 h-8 rounded-full bg-amber-400/70 text-slate-900 flex items-center justify-center flex-shrink-0">
+                         <div className="w-8 h-8 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center flex-shrink-0">
                             <UsersIcon />
                         </div>
-                        <div className="p-3 rounded-lg max-w-sm md:max-w-md bg-slate-700/70 text-white/70 italic">
+                        <div className="p-3 rounded-lg max-w-sm md:max-w-md bg-slate-700 text-white flex items-center gap-2">
                             <p className="text-sm">{currentModelTranscript}</p>
+                            <TypingIndicator className="text-gray-300" />
                         </div>
                     </div>
                 )}

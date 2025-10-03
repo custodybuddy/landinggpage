@@ -25,8 +25,7 @@ export const useEmailBuddy = () => {
             const keyPointsSuggestion = result.key_demands.map((demand: string) => `- Respond to the demand: "${demand}"`).join('\n');
             setAnalysis({ ...result, key_points_suggestion: keyPointsSuggestion });
         } catch (err: any) {
-            console.error("Email Analysis Error:", err);
-            setError(getFriendlyErrorMessage(err, 'email analysis', err.status));
+            setError(getFriendlyErrorMessage(err, 'email analysis'));
         } finally {
             setIsLoading(false);
         }

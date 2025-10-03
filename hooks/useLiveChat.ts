@@ -224,8 +224,7 @@ export const useLiveChat = (isOpen: boolean, systemInstruction: string): LiveCha
                         stopRecordingCleanup();
                     },
                     onerror: (e: ErrorEvent) => {
-                        console.error('Session error:', e);
-                        setError(getFriendlyErrorMessage(e, 'live chat session'));
+                        setError(getFriendlyErrorMessage(e.error || e, 'live chat session'));
                         stopRecordingCleanup();
                     },
                 },
@@ -234,7 +233,6 @@ export const useLiveChat = (isOpen: boolean, systemInstruction: string): LiveCha
             await sessionPromiseRef.current;
 
         } catch (err: any) {
-            console.error("Failed to start recording:", err);
             setError(getFriendlyErrorMessage(err, 'microphone access or session start'));
             await stopRecordingCleanup();
         }

@@ -54,6 +54,18 @@
       .animate-pulse-bright {
         animation: pulse-bright 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
       }
+      
+      /* Typing indicator animation */
+      @keyframes typing-bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1.0); }
+      }
+      .typing-dot {
+        display: inline-block;
+        background-color: currentColor;
+        border-radius: 50%;
+        animation: typing-bounce 1.4s infinite ease-in-out both;
+      }
     </style>
 <script type="importmap">
 {

@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
-import { analyzeCaseDocuments } from '../services/aiService';
-import { prepareContentParts } from '../utils/analysisUtils';
+import { analyzeCaseDocuments, prepareContentParts } from '../services/aiService';
 import { caseAnalysisSystemPrompt } from '../prompts';
 import { getFriendlyErrorMessage } from '../utils/errorUtils';
 
@@ -26,8 +25,7 @@ export const useCaseAnalysis = () => {
             const result = await analyzeCaseDocuments(contentParts, caseAnalysisSystemPrompt);
             setAnalysisResponse(result);
         } catch (err: any) {
-            console.error("Case Analysis Error:", err);
-            setError(getFriendlyErrorMessage(err, 'document analysis', err.status));
+            setError(getFriendlyErrorMessage(err, 'document analysis'));
         } finally {
             setIsLoading(false);
         }

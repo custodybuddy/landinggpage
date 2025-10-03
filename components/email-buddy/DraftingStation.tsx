@@ -3,10 +3,13 @@ import ClipboardIcon from '../icons/ClipboardIcon';
 import ClipboardCheckIcon from '../icons/ClipboardCheckIcon';
 import AlertTriangleIcon from '../icons/AlertTriangleIcon';
 import XIcon from '../icons/XIcon';
+import SpeakerIcon from '../icons/SpeakerIcon';
+import StopCircleIcon from '../icons/StopCircleIcon';
 import { formatMarkdown } from '../../utils/markdownParser';
 import { emailBuddySystemPrompt } from '../../prompts';
 import { getFriendlyErrorMessage } from '../../utils/errorUtils';
 import { generateDraftEmail } from '../../services/aiService';
+import { useTextToSpeech } from '../../hooks/useTextToSpeech';
 import { ToneOption } from '../EmailLawBuddy';
 
 interface DraftingStationProps {
@@ -30,6 +33,11 @@ const DraftingStation: React.FC<DraftingStationProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isCopied, setIsCopied] = useState(false);
+    const [speakingDraft, setSpeakingDraft] = useState<ToneOption | null>(null);
+
+    const { isSpeaking, speak, cancel } = useTextToSpeech({
+        onEnd: () => setSpeakingDraft(null)
+    });
 
     useEffect(() => {
         if (isShowingExample) {
@@ -39,7 +47,9 @@ const DraftingStation: React.FC<DraftingStationProps> = ({
             setKeyPoints(initialKeyPoints);
             setDrafts({});
         }
-    }, [isShowingExample, initialKeyPoints, exampleKeyPoints, exampleDrafts]);
+        cancel();
+        setSpeakingDraft(null);
+    }, [isShowingExample, initialKeyPoints, exampleKeyPoints, exampleDrafts, cancel]);
 
     useEffect(() => {
         if (isCopied) {
@@ -78,14 +88,10 @@ ${keyPoints}
 `;
             
             const result = await generateDraftEmail(userPrompt, emailBuddySystemPrompt);
-            // Fix: The new service returns a direct string, not a complex object.
             setDrafts(prev => ({ ...prev, [tone]: result }));
             
         } catch (err: any) {
-            // Log the detailed error for debugging purposes.
-            console.error("Draft Generation Error:", err);
-            // Use the utility to get a user-friendly message and set it in the state.
-            setError(getFriendlyErrorMessage(err, 'draft generation', err.status));
+            setError(getFriendlyErrorMessage(err, 'draft generation'));
         } finally {
             setIsLoading(false);
             setActiveDraftTone(null);
@@ -96,6 +102,24 @@ ${keyPoints}
         if (text) {
             navigator.clipboard.writeText(text);
             setIsCopied(true);
+        }
+    };
+
+    const cleanTextForSpeech = (text: string) => {
+        return text
+            .replace(/Subject: Re: .*\n\n/i, '')
+            .replace(/\[(.*?)\]/g, '$1')
+            .trim();
+    }
+
+    const handleReadAloud = (tone: ToneOption, text: string) => {
+        if (isSpeaking && speakingDraft === tone) {
+            cancel();
+            setSpeakingDraft(null);
+        } else {
+            const cleanText = cleanTextForSpeech(text);
+            speak(cleanText);
+            setSpeakingDraft(tone);
         }
     };
     
@@ -158,16 +182,26 @@ ${keyPoints}
                                             )}
                                         </div>
                                     )}
-                                    <button
-                                        onClick={() => handleCopy(drafts[tone])}
-                                        className="absolute top-2 right-2 flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-1 px-2 rounded-md transition-all text-xs"
-                                        aria-label={`Copy ${tone} draft to clipboard`}
-                                    >
-                                        {isCopied ? <ClipboardCheckIcon /> : <ClipboardIcon />}
-                                        <span>{isCopied ? 'Copied!' : 'Copy'}</span>
-                                    </button>
+                                    <div className="absolute top-2 right-2 flex gap-2">
+                                        <button
+                                            onClick={() => handleReadAloud(tone, drafts[tone])}
+                                            className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-1 px-2 rounded-md transition-all text-xs"
+                                            aria-label={`Read ${tone} draft aloud`}
+                                        >
+                                            {isSpeaking && speakingDraft === tone ? <StopCircleIcon className="w-4 h-4" /> : <SpeakerIcon className="w-4 h-4" />}
+                                            <span>{isSpeaking && speakingDraft === tone ? 'Stop' : 'Read'}</span>
+                                        </button>
+                                        <button
+                                            onClick={() => handleCopy(drafts[tone])}
+                                            className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-1 px-2 rounded-md transition-all text-xs"
+                                            aria-label={`Copy ${tone} draft to clipboard`}
+                                        >
+                                            {isCopied ? <ClipboardCheckIcon /> : <ClipboardIcon />}
+                                            <span>{isCopied ? 'Copied!' : 'Copy'}</span>
+                                        </button>
+                                    </div>
                                     <div 
-                                        className="text-gray-300 leading-relaxed prose prose-invert prose-p:my-2 prose-strong:text-amber-400 max-w-none text-sm"
+                                        className="text-gray-300 leading-relaxed prose prose-invert prose-p:my-2 prose-strong:text-amber-400 max-w-none text-sm pt-8"
                                         dangerouslySetInnerHTML={{ __html: formatMarkdown(drafts[tone]) }}
                                     />
                                 </div>
