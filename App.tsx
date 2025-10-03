@@ -1,14 +1,10 @@
-import React, { useState, lazy, Suspense, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import LiveChatWidget from './components/LiveChatWidget';
-import { routes } from './routes';
-
-const LiveChatModal = lazy(() => import('./components/LiveChatModal'));
+import { routes, externalLinks, NavLink } from './routes';
 
 const App: React.FC = () => {
     const [route, setRoute] = useState(window.location.hash || '#/');
-    const [isLiveChatModalOpen, setIsLiveChatModalOpen] = useState(false);
 
     useEffect(() => {
         const handleHashChange = () => {
@@ -22,33 +18,36 @@ const App: React.FC = () => {
         window.addEventListener('hashchange', handleHashChange);
         return () => window.removeEventListener('hashchange', handleHashChange);
     }, []);
-    
-    const handleOpenLiveChat = useCallback(() => setIsLiveChatModalOpen(true), []);
-    const handleCloseLiveChat = useCallback(() => setIsLiveChatModalOpen(false), []);
-
-    const isAnyModalOpen = isLiveChatModalOpen;
 
     const currentRoute = routes.find(r => r.path === route) || routes.find(r => r.path === '#/');
     const PageComponent = currentRoute!.component;
 
+    // Logic to prepare links for Header and Footer
+    const headerNavLinks: NavLink[] = [
+        ...routes
+            .filter(r => r.inHeader)
+            .map(r => ({ href: r.path, text: r.label, isExternal: false })),
+        ...externalLinks
+            .filter(l => l.inHeader)
+            .map(l => ({ href: l.href, text: l.text, isExternal: true }))
+    ];
+
+    const footerNavLinks: NavLink[] = [
+        ...routes
+            .filter(r => r.inFooter)
+            .map(r => ({ href: r.path, text: r.label, isExternal: false })),
+        ...externalLinks
+            .filter(l => l.inFooter)
+            .map(l => ({ href: l.href, text: l.text, isExternal: true }))
+    ];
+
     return (
         <div className="bg-slate-900 text-white">
-            <Header currentPath={route} />
-            <main aria-hidden={isAnyModalOpen}>
+            <Header currentPath={route} navLinks={headerNavLinks} />
+            <main>
                 <PageComponent />
             </main>
-            <Footer currentPath={route} aria-hidden={isAnyModalOpen} />
-
-            <LiveChatWidget onOpen={handleOpenLiveChat} />
-
-            <Suspense fallback={null}>
-                {isLiveChatModalOpen && (
-                    <LiveChatModal
-                        isOpen={isLiveChatModalOpen}
-                        onClose={handleCloseLiveChat}
-                    />
-                )}
-            </Suspense>
+            <Footer currentPath={route} navLinks={footerNavLinks} />
         </div>
     );
 };

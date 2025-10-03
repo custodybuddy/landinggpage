@@ -27,6 +27,12 @@ export interface ExternalLinkConfig {
     inFooter: boolean;
 }
 
+export interface NavLink {
+    href: string;
+    text: string;
+    isExternal?: boolean;
+}
+
 export const routes: RouteConfig[] = [
     { path: '#/', label: 'Home', component: HomePage, inHeader: true, inFooter: false },
     { path: '#/about', label: 'About Us', component: AboutPage, inHeader: true, inFooter: true },

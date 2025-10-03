@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { routes, externalLinks } from '../routes';
+import React, { useState, useEffect, useRef } from 'react';
+import { NavLink } from '../routes';
 import MenuIcon from './icons/MenuIcon';
 import BookOpenIcon from './icons/BookOpenIcon';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface HeaderProps {
     currentPath: string;
+    navLinks: NavLink[];
 }
 
-const Header: React.FC<HeaderProps> = ({ currentPath }) => {
+const Header: React.FC<HeaderProps> = ({ currentPath, navLinks }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+    // Accessibility: Trap focus within the mobile menu
+    useFocusTrap(mobileMenuRef, isMenuOpen, toggleMenu);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -23,13 +31,8 @@ const Header: React.FC<HeaderProps> = ({ currentPath }) => {
         ? 'fixed top-0 left-0 w-full z-50 bg-slate-900/80 backdrop-blur-sm shadow-md transition-all duration-300'
         : 'fixed top-0 left-0 w-full z-50 bg-transparent transition-all duration-300';
 
-    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-    const navLinks = routes.filter(r => r.inHeader);
-    const externalNavLinks = externalLinks.filter(l => l.inHeader);
-
-    const renderLink = (link: { href: string; text: string; external?: boolean }, isMobile: boolean = false) => {
-        const isActive = !link.external && link.href === currentPath;
+    const renderLink = (link: NavLink, isMobile: boolean = false) => {
+        const isActive = !link.isExternal && link.href === currentPath;
 
         const commonClasses = 'transition-colors duration-200 ease-out flex items-center';
         const desktopClasses = `gap-1.5 text-sm font-semibold ${isActive ? 'text-amber-400' : 'hover:text-amber-400'}`;
@@ -42,8 +45,8 @@ const Header: React.FC<HeaderProps> = ({ currentPath }) => {
                 key={link.text} 
                 href={link.href} 
                 className={classes}
-                target={link.external ? '_blank' : '_self'} 
-                rel={link.external ? 'noopener noreferrer' : ''}
+                target={link.isExternal ? '_blank' : '_self'} 
+                rel={link.isExternal ? 'noopener noreferrer' : undefined}
                 onClick={isMobile ? toggleMenu : undefined}
                 aria-current={isActive ? 'page' : undefined}
             >
@@ -65,8 +68,7 @@ const Header: React.FC<HeaderProps> = ({ currentPath }) => {
                             <span className="text-amber-400">.COM</span>
                         </a>
                         <div className="flex items-center gap-6">
-                            {navLinks.map(link => renderLink({ href: link.path, text: link.label }))}
-                            {externalNavLinks.map(link => renderLink({ ...link, external: true }))}
+                            {navLinks.map(link => renderLink(link))}
                         </div>
                     </div>
 
@@ -85,11 +87,10 @@ const Header: React.FC<HeaderProps> = ({ currentPath }) => {
             </nav>
 
             {/* Mobile Menu */}
-            <div id="mobile-menu" role="dialog" aria-modal="true" aria-labelledby="mobile-menu-title" className={`fixed top-0 left-0 w-full h-full bg-slate-900 z-40 md:hidden transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <div ref={mobileMenuRef} id="mobile-menu" role="dialog" aria-modal="true" aria-labelledby="mobile-menu-title" className={`fixed top-0 left-0 w-full h-full bg-slate-900 z-40 md:hidden transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <h2 id="mobile-menu-title" className="sr-only">Main Menu</h2>
                 <div className="p-6 flex flex-col items-center space-y-6 text-center pt-24">
-                    {navLinks.map(link => renderLink({ href: link.path, text: link.label }, true))}
-                    {externalNavLinks.map(link => renderLink({ ...link, external: true }, true))}
+                    {navLinks.map(link => renderLink(link, true))}
                     <a href="#/features" className="inline-block bg-amber-400 text-black font-semibold py-3 px-8 rounded-full shadow-lg mt-4" onClick={toggleMenu}>
                         Start Now
                     </a>

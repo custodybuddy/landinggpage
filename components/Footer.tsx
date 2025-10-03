@@ -1,36 +1,25 @@
 import React from 'react';
-import { routes, externalLinks } from '../routes';
+import { NavLink } from '../routes';
 
 interface FooterProps {
     currentPath: string;
+    navLinks: NavLink[];
     "aria-hidden"?: boolean;
 }
 
-const Footer: React.FC<FooterProps> = ({ currentPath, "aria-hidden": ariaHidden }) => {
-    const footerLinks = routes.filter(r => r.inFooter);
-    const externalFooterLinks = externalLinks.filter(l => l.inFooter);
-
+const Footer: React.FC<FooterProps> = ({ currentPath, navLinks, "aria-hidden": ariaHidden }) => {
     return (
         <footer className="bg-slate-900 py-8 text-center text-gray-400 border-t border-slate-800" aria-hidden={ariaHidden}>
             <div className="container mx-auto px-4">
-                <nav className="space-x-4 mb-4">
-                    {footerLinks.map(link => (
+                <nav className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-y-2 gap-x-6 mb-6">
+                    {navLinks.map(link => (
                         <a 
-                            key={link.path}
-                            href={link.path} 
-                            className={`${link.path === currentPath ? 'text-amber-400' : 'hover:text-amber-400'} transition-colors duration-200 ease-out`}
-                            aria-current={link.path === currentPath ? 'page' : undefined}
-                        >
-                            {link.label}
-                        </a>
-                    ))}
-                    {externalFooterLinks.map(link => (
-                         <a 
                             key={link.href}
                             href={link.href} 
-                            className="hover:text-amber-400 transition-colors duration-200 ease-out" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
+                            className={`${!link.isExternal && link.href === currentPath ? 'text-amber-400' : 'hover:text-amber-400'} transition-colors duration-200 ease-out`}
+                            aria-current={!link.isExternal && link.href === currentPath ? 'page' : undefined}
+                            target={link.isExternal ? '_blank' : '_self'}
+                            rel={link.isExternal ? 'noopener noreferrer' : undefined}
                         >
                             {link.text}
                         </a>

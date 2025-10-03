@@ -3,7 +3,7 @@ import React from 'react';
 
 const CTA: React.FC = () => {
     return (
-        <section className="bg-amber-400 text-slate-900 py-20 text-center animate-fade-in">
+        <section className="bg-amber-400 text-slate-900 py-16 md:py-20 text-center animate-fade-in">
             <div className="container mx-auto px-4">
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4">
                     <span>Stop Feeling Powerless.</span> <span>Start Fighting Back.</span>

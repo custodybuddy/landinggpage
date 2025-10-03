@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import XIcon from './icons/XIcon';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ModalProps {
     isOpen: boolean;
@@ -10,6 +11,10 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
     const [isRendered, setIsRendered] = useState(isOpen);
+    const modalRef = useRef<HTMLDivElement>(null);
+
+    // Accessibility: Trap focus within the modal when open
+    useFocusTrap(modalRef, isOpen, onClose);
 
     useEffect(() => {
         if (isOpen) {
@@ -37,6 +42,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
             aria-labelledby="modal-title"
         >
             <div 
+                ref={modalRef}
                 className={`bg-slate-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col relative transition-all duration-400 ease-out ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 motion-safe:scale-95 motion-safe:translate-y-4'}`}
                 onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
                 onTransitionEnd={handleAnimationEnd}

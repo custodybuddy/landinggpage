@@ -9,7 +9,7 @@ const Resources: React.FC = () => {
 
     return (
         <section id="recommended-resources" className="py-16 md:py-24 bg-slate-950 overflow-hidden">
-            <div className="container mx-auto px-6 text-center relative z-10">
+            <div className="container mx-auto px-4 md:px-6 text-center relative z-10">
                 <h3 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 animate-fade-in-up">
                     <span className="text-amber-400">Recommended</span>
                     <span className="text-white/90"> Reads</span>

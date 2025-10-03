@@ -100,9 +100,9 @@ const ReportResult: React.FC<ReportResultProps> = ({ response, originalData, onS
 
     return (
         <div className="space-y-6 animate-fade-in">
-            <div className="flex justify-between items-center">
-                <h3 className="text-xl font-bold text-amber-400">Generated Incident Report</h3>
-                <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-4 md:flex-row md:justify-between items-start md:items-center">
+                <h3 className="text-xl font-bold text-amber-400 flex-shrink-0">Generated Incident Report</h3>
+                <div className="flex flex-wrap items-center justify-start gap-2">
                     <button
                         onClick={onStartOver}
                         className="flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 font-semibold transition-colors"
@@ -110,7 +110,7 @@ const ReportResult: React.FC<ReportResultProps> = ({ response, originalData, onS
                         <RotateCwIcon className="w-4 h-4" />
                         New Report
                     </button>
-                    <div className="h-6 w-px bg-slate-700 mx-1"></div>
+                    <div className="h-6 w-px bg-slate-700 mx-1 hidden sm:block"></div>
                      <button
                         onClick={handlePlayPause}
                         className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition-all"

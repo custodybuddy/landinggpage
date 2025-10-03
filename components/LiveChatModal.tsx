@@ -2,12 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLiveChat } from '../hooks/useLiveChat';
 import { Persona, personaPrompts } from '../prompts';
 import ChatUI from './live-chat/ChatUI';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const LiveChatModal: React.FC<{ isOpen: boolean; onClose: () => void; }> = ({ isOpen, onClose }) => {
     const [isRendered, setIsRendered] = useState(isOpen);
     const [selectedPersona, setSelectedPersona] = useState<Persona>('Strategic Advisor');
     const [isPersonaMenuOpen, setIsPersonaMenuOpen] = useState(false);
     const personaMenuRef = useRef<HTMLDivElement>(null);
+    const modalRef = useRef<HTMLDivElement>(null);
+
+    // Accessibility: Trap focus within the modal
+    useFocusTrap(modalRef, isOpen, onClose);
 
     // Load persona from localStorage on mount
     useEffect(() => {
@@ -65,8 +70,10 @@ const LiveChatModal: React.FC<{ isOpen: boolean; onClose: () => void; }> = ({ is
             onClick={handleClose}
             role="dialog"
             aria-modal="true"
+            aria-labelledby="chat-modal-title"
         >
             <div 
+                ref={modalRef}
                 className={`bg-slate-800 rounded-2xl shadow-xl w-full max-w-2xl h-[80vh] max-h-[700px] flex flex-col relative transition-all duration-400 ease-out ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 motion-safe:scale-95'}`}
                 onClick={(e) => e.stopPropagation()}
                 onTransitionEnd={handleAnimationEnd}
@@ -76,6 +83,7 @@ const LiveChatModal: React.FC<{ isOpen: boolean; onClose: () => void; }> = ({ is
                     onClose={handleClose}
                     selectedPersona={selectedPersona}
                     isPersonaMenuOpen={isPersonaMenuOpen}
+                    {/* Fix: Corrected typo from `!isPersona-menu-open` to `!isPersonaMenuOpen`. */}
                     onTogglePersonaMenu={() => setIsPersonaMenuOpen(!isPersonaMenuOpen)}
                     onSelectPersona={handleSelectPersona}
                     personaMenuRef={personaMenuRef}
