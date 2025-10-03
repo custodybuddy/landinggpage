@@ -114,4 +114,4 @@ const Header: React.FC<HeaderProps> = ({ onOpenTemplateLibrary }) => {
     );
 };
 
-export default Header;
+export default React.memo(Header);

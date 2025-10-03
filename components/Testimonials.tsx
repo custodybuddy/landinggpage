@@ -28,4 +28,4 @@ const Testimonials: React.FC = () => {
     );
 };
 
-export default Testimonials;
+export default React.memo(Testimonials);

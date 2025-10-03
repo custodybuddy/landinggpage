@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 
 interface FooterProps {
@@ -36,4 +37,4 @@ const Footer: React.FC<FooterProps> = ({ onOpenPrivacyPolicy, onOpenTermsOfUse, 
     );
 };
 
-export default Footer;
+export default React.memo(Footer);

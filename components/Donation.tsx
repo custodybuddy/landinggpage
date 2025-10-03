@@ -8,7 +8,7 @@ const Donation: React.FC = () => {
                 <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8 font-medium text-gray-300">
                     CustodyBuddy is built to help every parent, regardless of their financial situation. Your donation helps us provide this vital toolkit at no cost to those who need it most, ensuring no parent is left to fight alone.
                 </p>
-                <a href="#" className="inline-block bg-amber-400 text-black font-bold py-4 px-10 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 motion-safe:active:scale-95 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-900">
+                <a href="#contact" className="inline-block bg-amber-400 text-black font-bold py-4 px-10 rounded-full shadow-lg transition-all duration-200 ease-out motion-safe:hover:scale-105 motion-safe:active:scale-95 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-900">
                     Support Our Mission
                 </a>
             </div>
@@ -16,4 +16,4 @@ const Donation: React.FC = () => {
     );
 };
 
-export default Donation;
+export default React.memo(Donation);

@@ -8,6 +8,7 @@ import Feedback from '../Feedback';
 import ExternalLinkIcon from '../icons/ExternalLinkIcon';
 import { getISODate } from '../../utils/dateUtils';
 import { exportTextFile } from '../../utils/exportUtils';
+import { formatMarkdown } from '../../utils/markdownParser';
 
 interface ReportResultProps {
     response: IncidentReport;
@@ -81,7 +82,10 @@ const ReportResult: React.FC<ReportResultProps> = ({ response, originalData, onS
             <div className="p-4 bg-slate-900 border border-slate-700 rounded-lg space-y-4">
                 <section>
                     <h4 className="font-bold text-lg text-gray-200 mb-2">Professional Summary</h4>
-                    <p className="text-gray-300 whitespace-pre-wrap">{response.professionalSummary}</p>
+                    <div
+                        className="text-gray-300 leading-relaxed prose prose-invert prose-p:my-2 prose-ul:my-2 prose-strong:text-amber-400 max-w-none"
+                        dangerouslySetInnerHTML={{ __html: formatMarkdown(response.professionalSummary) }}
+                    />
                 </section>
                 <section>
                     <h4 className="font-bold text-lg text-gray-200 mb-2">Observed Impact</h4>

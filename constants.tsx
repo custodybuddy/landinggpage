@@ -36,7 +36,7 @@ export const features = [
         title: <>Fathers' Rights Canada: <span className="text-amber-400">Fight Back</span> Against Bias.</>,
         description: 'Get a strategic advantage with tailored strategies, guided legal forms, and legal aid connections for Canadian fathers.',
         buttonText: 'LEVEL THE FIELD',
-        link: '#features',
+        link: '#contact',
     },
     {
         id: 'email-buddy',

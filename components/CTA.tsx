@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 const CTA: React.FC = () => {
@@ -18,4 +19,4 @@ const CTA: React.FC = () => {
     );
 };
 
-export default CTA;
+export default React.memo(CTA);

@@ -1,9 +1,22 @@
-import React, { useState } from 'react';
+
+import React, { useState, lazy, Suspense } from 'react';
 import { features } from '../constants';
 import Modal from './Modal';
-import CaseAnalysisTool from './CaseAnalysisTool';
-import EmailLawBuddy from './EmailLawBuddy';
-import ReportAnIncident from './report-incident/ReportAnIncident';
+import SpinnerIcon from './icons/SpinnerIcon';
+
+// Lazy load the components that are opened in modals
+const CaseAnalysisTool = lazy(() => import('./CaseAnalysisTool'));
+const EmailLawBuddy = lazy(() => import('./EmailLawBuddy'));
+const ReportAnIncident = lazy(() => import('./report-incident/ReportAnIncident'));
+
+const SuspenseFallback: React.FC = () => (
+    <div className="flex justify-center items-center h-full min-h-[400px]">
+        <div className="text-center text-gray-400">
+            <SpinnerIcon className="w-8 h-8 mx-auto mb-2 text-amber-400" />
+            <p>Loading Tool...</p>
+        </div>
+    </div>
+);
 
 const Features: React.FC = () => {
     const [isCaseAnalysisModalOpen, setIsCaseAnalysisModalOpen] = useState(false);
@@ -66,21 +79,27 @@ const Features: React.FC = () => {
                 onClose={() => setIsCaseAnalysisModalOpen(false)}
                 title="Family Law Case Analysis Tool"
             >
-                <CaseAnalysisTool isOpen={isCaseAnalysisModalOpen} />
+                <Suspense fallback={<SuspenseFallback />}>
+                    <CaseAnalysisTool isOpen={isCaseAnalysisModalOpen} />
+                </Suspense>
             </Modal>
             <Modal
                 isOpen={isEmailBuddyModalOpen}
                 onClose={() => setIsEmailBuddyModalOpen(false)}
                 title="Email Law Buddy"
             >
-                <EmailLawBuddy isOpen={isEmailBuddyModalOpen} />
+                <Suspense fallback={<SuspenseFallback />}>
+                    <EmailLawBuddy isOpen={isEmailBuddyModalOpen} />
+                </Suspense>
             </Modal>
             <Modal
                 isOpen={isReportIncidentModalOpen}
                 onClose={() => setIsReportIncidentModalOpen(false)}
                 title="Report An Incident"
             >
-                <ReportAnIncident isOpen={isReportIncidentModalOpen} />
+                <Suspense fallback={<SuspenseFallback />}>
+                    <ReportAnIncident isOpen={isReportIncidentModalOpen} />
+                </Suspense>
             </Modal>
         </>
     );

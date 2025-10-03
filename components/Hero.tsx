@@ -1,3 +1,4 @@
+
 import React from 'react';
 import CheckCheckIcon from './icons/CheckCheckIcon';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
@@ -36,4 +37,4 @@ const Hero: React.FC = () => {
     );
 };
 
-export default Hero;
+export default React.memo(Hero);
