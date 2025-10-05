@@ -3,8 +3,8 @@ import UserIcon from './icons/UserIcon';
 import MailIcon from './icons/MailIcon';
 import SpinnerIcon from './icons/SpinnerIcon';
 import AlertTriangleIcon from './icons/AlertTriangleIcon';
-
-const WEBHOOK_URL = "https://hook.us1.make.com/4l8lzx2hcxhby7v1qlh1grhna8oymlnd";
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { sendContactMessage } from '../services/aiService';
 
 type FormState = 'idle' | 'loading' | 'success' | 'error';
 interface FormData {
@@ -38,7 +38,7 @@ const AnimatedSuccessIcon: React.FC<{ className?: string }> = ({ className }) =>
 
 
 const Contact: React.FC = () => {
-    const [formData, setFormData] = useState<FormData>({ name: '', email: '', message: '' });
+    const [formData, setFormData] = useLocalStorage<FormData>('contact-form-data', { name: '', email: '', message: '' });
     const [errors, setErrors] = useState<FormErrors>({});
     const [formState, setFormState] = useState<FormState>('idle');
     const [errorMessage, setErrorMessage] = useState('');
@@ -73,19 +73,10 @@ const Contact: React.FC = () => {
         setErrorMessage('');
 
         try {
-            const response = await fetch(WEBHOOK_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok.');
-            }
+            await sendContactMessage(formData);
             
             setFormState('success');
+            // Clear form data from state and localStorage
             setFormData({ name: '', email: '', message: '' });
 
         } catch (error) {
@@ -194,7 +185,7 @@ const Contact: React.FC = () => {
                             
                             {formState === 'error' && (
                                 <div className="bg-red-900/20 border border-red-500/50 text-red-400 text-sm rounded-lg p-3 flex items-center gap-3" role="alert">
-                                    <AlertTriangleIcon className="w-5 h-5 flex-shrink-0" />
+                                    <AlertTriangleIcon className="w-5 w-5 flex-shrink-0" />
                                     <p>{errorMessage}</p>
                                 </div>
                             )}

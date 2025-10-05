@@ -3,29 +3,17 @@ import { useLiveChat } from '../hooks/useLiveChat';
 import { Persona, personaPrompts } from '../prompts';
 import ChatUI from './live-chat/ChatUI';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const LiveChatModal: React.FC<{ isOpen: boolean; onClose: () => void; }> = ({ isOpen, onClose }) => {
     const [isRendered, setIsRendered] = useState(isOpen);
-    const [selectedPersona, setSelectedPersona] = useState<Persona>('Strategic Advisor');
+    const [selectedPersona, setSelectedPersona] = useLocalStorage<Persona>('custodybuddy-persona', 'Strategic Advisor');
     const [isPersonaMenuOpen, setIsPersonaMenuOpen] = useState(false);
     const personaMenuRef = useRef<HTMLDivElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
 
     // Accessibility: Trap focus within the modal
     useFocusTrap(modalRef, isOpen, onClose);
-
-    // Load persona from localStorage on mount
-    useEffect(() => {
-        const savedPersona = localStorage.getItem('custodybuddy-persona') as Persona;
-        if (savedPersona && personaPrompts[savedPersona]) {
-            setSelectedPersona(savedPersona);
-        }
-    }, []);
-    
-    // Save persona to localStorage on change
-    useEffect(() => {
-        localStorage.setItem('custodybuddy-persona', selectedPersona);
-    }, [selectedPersona]);
 
     const liveChat = useLiveChat(isOpen, personaPrompts[selectedPersona]);
 
@@ -83,7 +71,6 @@ const LiveChatModal: React.FC<{ isOpen: boolean; onClose: () => void; }> = ({ is
                     onClose={handleClose}
                     selectedPersona={selectedPersona}
                     isPersonaMenuOpen={isPersonaMenuOpen}
-                    {/* Fix: Corrected typo from `!isPersona-menu-open` to `!isPersonaMenuOpen`. */}
                     onTogglePersonaMenu={() => setIsPersonaMenuOpen(!isPersonaMenuOpen)}
                     onSelectPersona={handleSelectPersona}
                     personaMenuRef={personaMenuRef}

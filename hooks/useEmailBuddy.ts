@@ -4,9 +4,10 @@ import { analyzeEmail } from '../services/aiService';
 import { emailAnalysisSystemPrompt } from '../prompts';
 import { getFriendlyErrorMessage } from '../utils/errorUtils';
 import { Analysis } from '../components/EmailLawBuddy';
+import { useLocalStorage } from './useLocalStorage';
 
 export const useEmailBuddy = () => {
-    const [receivedEmail, setReceivedEmail] = useState('');
+    const [receivedEmail, setReceivedEmail] = useLocalStorage<string>('email-buddy-received-email', '');
     const [analysis, setAnalysis] = useState<Analysis | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -37,7 +38,7 @@ export const useEmailBuddy = () => {
         setAnalysis(null);
         setError(null);
         setIsLoading(false);
-    }, []);
+    }, [setReceivedEmail]);
 
     return {
         receivedEmail,

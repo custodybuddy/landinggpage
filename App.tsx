@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { routes, externalLinks, NavLink } from './routes';
@@ -6,28 +6,17 @@ import { ModalProvider } from './contexts/ModalContext';
 import GlobalModals from './components/GlobalModals';
 import { useConsent } from './hooks/useConsent';
 import ConsentModal from './components/ConsentModal';
+import { HashRouter, Routes, useRoute } from './components/Router';
 
-const App: React.FC = () => {
-    const [route, setRoute] = useState(window.location.hash || '#/');
+/**
+ * The main layout of the application, including Header, Footer, and the main content area.
+ * This component is wrapped by providers and the router, allowing it to access their context.
+ */
+const AppLayout: React.FC = () => {
+    const { currentPath } = useRoute(); // Access the current path from the router context
     const { consentGiven, acceptConsent } = useConsent();
 
-    useEffect(() => {
-        const handleHashChange = () => {
-            setRoute(window.location.hash || '#/');
-            window.scrollTo(0, 0); // Scroll to top on page change
-        };
-
-        // Set initial route
-        handleHashChange();
-
-        window.addEventListener('hashchange', handleHashChange);
-        return () => window.removeEventListener('hashchange', handleHashChange);
-    }, []);
-
-    const currentRoute = routes.find(r => r.path === route) || routes.find(r => r.path === '#/');
-    const PageComponent = currentRoute!.component;
-
-    // Logic to prepare links for Header and Footer
+    // The logic to prepare navigation links remains the same
     const headerNavLinks: NavLink[] = [
         ...routes
             .filter(r => r.inHeader)
@@ -47,16 +36,29 @@ const App: React.FC = () => {
     ];
 
     return (
+        <div className="bg-slate-900 text-white">
+            <Header currentPath={currentPath} navLinks={headerNavLinks} />
+            <main>
+                <Routes routes={routes} />
+            </main>
+            <Footer currentPath={currentPath} navLinks={footerNavLinks} />
+            <GlobalModals />
+            {!consentGiven && <ConsentModal onAccept={acceptConsent} />}
+        </div>
+    );
+};
+
+
+/**
+ * The root component of the application.
+ * It sets up the context providers and the hash-based router.
+ */
+const App: React.FC = () => {
+    return (
         <ModalProvider>
-            <div className="bg-slate-900 text-white">
-                <Header currentPath={route} navLinks={headerNavLinks} />
-                <main>
-                    <PageComponent />
-                </main>
-                <Footer currentPath={route} navLinks={footerNavLinks} />
-                <GlobalModals />
-                {!consentGiven && <ConsentModal onAccept={acceptConsent} />}
-            </div>
+            <HashRouter>
+                <AppLayout />
+            </HashRouter>
         </ModalProvider>
     );
 };

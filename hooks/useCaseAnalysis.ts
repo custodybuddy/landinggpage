@@ -2,10 +2,11 @@ import { useState, useCallback } from 'react';
 import { analyzeCaseDocuments, prepareContentParts } from '../services/aiService';
 import { caseAnalysisSystemPrompt } from '../prompts';
 import { getFriendlyErrorMessage } from '../utils/errorUtils';
+import { useLocalStorage } from './useLocalStorage';
 
 export const useCaseAnalysis = () => {
     const [files, setFiles] = useState<File[]>([]);
-    const [pastedText, setPastedText] = useState('');
+    const [pastedText, setPastedText] = useLocalStorage<string>('case-analysis-pasted-text', '');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [analysisResponse, setAnalysisResponse] = useState<string | null>(null);
@@ -37,7 +38,7 @@ export const useCaseAnalysis = () => {
         setError(null);
         setAnalysisResponse(null);
         setIsLoading(false);
-    }, []);
+    }, [setPastedText]);
 
     return {
         files,

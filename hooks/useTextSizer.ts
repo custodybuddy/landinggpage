@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
+import { useLocalStorage } from './useLocalStorage';
 
 const FONT_SCALE_KEY = 'custodybuddy-font-scale';
 export const MIN_SCALE = 0.8;
@@ -7,23 +8,12 @@ const STEP = 0.1;
 const DEFAULT_SCALE = 1.0;
 
 export const useTextSizer = () => {
-    const [scale, setScale] = useState<number>(() => {
-        try {
-            const savedScale = localStorage.getItem(FONT_SCALE_KEY);
-            // round to two decimal places to avoid floating point issues from storage
-            return savedScale ? parseFloat(parseFloat(savedScale).toFixed(2)) : DEFAULT_SCALE;
-        } catch (error) {
-            return DEFAULT_SCALE;
-        }
-    });
+    const [scale, setScale] = useLocalStorage<number>(FONT_SCALE_KEY, DEFAULT_SCALE);
 
     useEffect(() => {
-        document.documentElement.style.fontSize = `${scale * 100}%`;
-        try {
-            localStorage.setItem(FONT_SCALE_KEY, scale.toString());
-        } catch (error) {
-            console.error("Failed to save font scale to localStorage", error);
-        }
+        // Ensure the scale is clamped within bounds, in case of manual localStorage changes
+        const clampedScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale));
+        document.documentElement.style.fontSize = `${clampedScale * 100}%`;
     }, [scale]);
 
     const increase = useCallback(() => {
@@ -31,18 +21,18 @@ export const useTextSizer = () => {
             const newScale = parseFloat((currentScale + STEP).toFixed(2));
             return Math.min(MAX_SCALE, newScale);
         });
-    }, []);
+    }, [setScale]);
 
     const decrease = useCallback(() => {
         setScale(currentScale => {
             const newScale = parseFloat((currentScale - STEP).toFixed(2));
             return Math.max(MIN_SCALE, newScale);
         });
-    }, []);
+    }, [setScale]);
 
     const reset = useCallback(() => {
         setScale(DEFAULT_SCALE);
-    }, []);
+    }, [setScale]);
 
     return { scale, increase, decrease, reset };
 };

@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { generateIncidentReport } from '../services/aiService';
 import { incidentReportSystemPrompt } from '../prompts';
 import { getFriendlyErrorMessage } from '../utils/errorUtils';
+import { useLocalStorage } from './useLocalStorage';
 
 export interface IncidentData {
     dateTime: string;
@@ -31,7 +32,7 @@ const initialIncidentData: IncidentData = {
 };
 
 export const useIncidentReporter = () => {
-    const [incidentData, setIncidentData] = useState<IncidentData>(initialIncidentData);
+    const [incidentData, setIncidentData] = useLocalStorage<IncidentData>('incident-reporter-data', initialIncidentData);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [reportResponse, setReportResponse] = useState<IncidentReport | null>(null);
@@ -62,7 +63,7 @@ export const useIncidentReporter = () => {
         setError(null);
         setReportResponse(null);
         setIsLoading(false);
-    }, []);
+    }, [setIncidentData]);
 
     return {
         incidentData,
